@@ -1,4 +1,4 @@
-BOT_TOKEN = "5179947183:AAEJDNPS-va5ZhpCO2OTFQKUTLFWWkh-7Iw"
+BOT_TOKEN = "5201952243:AAEE-GiBvifyzfkSXeFKRlbri0NJ3Ay1WbA"
 
 DB_HOST = "ec2-52-201-124-168.compute-1.amazonaws.com"
 DB_NAME = "dc3reset0ggqkp"
