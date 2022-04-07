@@ -22,12 +22,11 @@ async def start_handler(event: types.Message):
     # Test if user exist: if true - yes, false - no
     print("[DEBUG] User ", event.from_user.id, " is exists: ",
           userDao.existsUserById(event.from_user.id))
-
+    print(userDao.findAllUsers())
     # If User not exists in DB insert him data into DB
     if not userDao.existsUserById(event.from_user.id):
         userDao.addUser(user_id=event.from_user.id, user_name=event.from_user.username,
                         first_name=event.from_user.first_name, last_name=event.from_user.last_name)
-
     await event.answer(
         f"Привіт, {event.from_user.get_mention(as_html=True)} 👋!",
         parse_mode=types.ParseMode.HTML,

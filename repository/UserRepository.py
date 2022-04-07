@@ -1,6 +1,3 @@
-import psycopg2
-
-
 class UserRepository:
     def __init__(self, conn):
         self.conn = conn
@@ -24,8 +21,8 @@ class UserRepository:
 
     def existsUserById(self, user_id):
         with self.conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM public.\"User\" WHERE \"User_id\" = %s", (user_id,))
-            return cursor.fetchall() != "NULL"
+            cursor.execute("SELECT EXISTS(SELECT 1 FROM public.\"User\" WHERE \"User_id\" = %s)", (user_id,))
+            return cursor.fetchone()[0]
 
     # Update query
 
