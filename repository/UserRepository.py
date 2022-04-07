@@ -1,7 +1,7 @@
 import psycopg2
 
 
-class UserDAO:
+class UserRepository:
     def __init__(self, conn):
         self.conn = conn
 

@@ -3,7 +3,7 @@ import psycopg2
 
 from aiogram import Bot, Dispatcher, executor, types
 from config import *
-from dao.UserDAO import UserDAO
+from repository.UserRepository import UserRepository
 
 try:
     # DB Connection
@@ -13,16 +13,21 @@ try:
 except psycopg2.Error as e:
     print("[INFO] Connection failed".format(e))
 
-userDao = UserDAO(conn)
+# User Data Access Object
+userDao = UserRepository(conn)
 
 
+# Call when /start or /restart
 async def start_handler(event: types.Message):
+    # Test if user exist: if true - yes, false - no
     print("[DEBUG] User ", event.from_user.id, " is exists: ",
-          userDao.existsUserById(event.from_user.id))  # test if user exist: if true - yes, false - no
+          userDao.existsUserById(event.from_user.id))
 
+    # If User not exists in DB insert him data into DB
     if not userDao.existsUserById(event.from_user.id):
         userDao.addUser(user_id=event.from_user.id, user_name=event.from_user.username,
                         first_name=event.from_user.first_name, last_name=event.from_user.last_name)
+
     await event.answer(
         f"Привіт, {event.from_user.get_mention(as_html=True)} 👋!",
         parse_mode=types.ParseMode.HTML,
@@ -37,7 +42,7 @@ def main():
         executor.start_polling(disp)
     finally:
         conn.close()
-        print("[INFO] Connection to db is closed")
+        print("[INFO] Connection to DB closed")
 
 
 if __name__ == '__main__':
