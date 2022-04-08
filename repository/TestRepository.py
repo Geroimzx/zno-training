@@ -3,10 +3,6 @@ class TestRepository:
         self.conn = conn
 
     # Create query
-    def addUser(self, user_id, user_name, first_name, last_name):
-        with self.conn.cursor() as cursor:
-            cursor.execute("INSERT INTO public.\"User\"(\"User_id\", \"UserName\", \"FirstName\", \"LastName\") VALUES(%s, %s, %s, %s)",
-                           (user_id, user_name, first_name, last_name))
 
     # Read query
 
@@ -46,7 +42,24 @@ class TestRepository:
     # Question Read query
     def findAllQuestionByTestId(self, test_id):
         with self.conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM public.\"Question\" WHERE \"Test_id\" = %s", (test_id,))
+            cursor.execute("SELECT * FROM public.\"Question\" WHERE \"Test_id\" = %s \"ORDER BY QuestionNumber\"", (test_id,))
+            return cursor.fetchall()
+
+    def findQuestionByTestIdAndQuestionNumber(self, test_id, question_number):
+        with self.conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM public.\"Question\" WHERE \"Test_id\" = %s AND \"Question_number\" = %s ORDER BY \"Question_number\"", (test_id, question_number,))
+            return cursor.fetchall()
+
+    # Answer Read query
+    def findAllAnswerByQuestionId(self, question_number):
+        with self.conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM public.\"Answer\" WHERE \"Question_number\" = %s", (question_number,))
+            return cursor.fetchall()
+
+    # UserAnswer Read query TODO: test this
+    def findAllUserAnswerByUserTestId(self, user_test_id):
+        with self.conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM public.\"UserAnswer\" a WHERE \"UserTest_id\" = %s LEFT JOIN public.\"Question\" q ON a.\"Question_id\" = q.\"Question_id\"", (user_test_id,))
             return cursor.fetchall()
 
     # Update query
