@@ -6,6 +6,7 @@ from config import *
 from repository.UserRepository import *
 from repository.TestRepository import *
 from repository.SubjectRepository import *
+from interface import menuCallbackAnswers
 
 # ---- Tmp Buttons ----
 import interface.menusButtons as nav
@@ -44,8 +45,7 @@ async def start_handler(event: types.Message):
     await event.answer(
         f"Привіт, {event.from_user.get_mention(as_html=True)} 👋!",
         parse_mode=types.ParseMode.HTML,
-        reply_markup=nav.mainMenu_inline,
-
+        reply_markup=nav.main_menu,
     )
 
 
@@ -75,14 +75,17 @@ async def test_handler3(event: types.Message):
 # ---- Main func ----
 def main():
     try:
-        disp = Dispatcher(bot=bot)
-        disp.register_message_handler(start_handler, commands={"start", "restart"})
-        disp.register_message_handler(test_handler, commands={"test"})
+        dp = Dispatcher(bot=bot)
+        dp.register_message_handler(start_handler, commands={"start", "restart"})
+        dp.register_message_handler(test_handler, commands={"test"})
         #       ---- My test handlers ----
-        disp.register_message_handler(test_handler3, commands={"testSub"})
-        #        disp.register_message_handler(test_handler2, lambda msg: msg.text == 'Вибір року')
-        disp.register_callback_query_handler(test_handler2, lambda c: c.data == 'button1')
-        executor.start_polling(disp)
+        menuCallbackAnswers.register_handlers_main_menu(dp)
+        dp.register_message_handler(test_handler3, commands={"testSub"})
+
+        #        dp.register_message_handler(test_handler2, lambda msg: msg.text == 'Вибір року')
+        #        dp.register_callback_query_handler(test_handler2, lambda c: c.data == 'button1')
+
+        executor.start_polling(dp)
     finally:
         conn.close()
         print("[INFO] Connection to DB closed")
