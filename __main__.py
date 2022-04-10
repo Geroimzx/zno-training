@@ -8,7 +8,7 @@ from repository.TestRepository import *
 from repository.SubjectRepository import *
 
 # ---- Tmp Buttons ----
-import interface.markups as nav
+import interface.menusButtons as nav
 
 try:
     # DB Connection
