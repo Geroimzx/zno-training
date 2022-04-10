@@ -27,6 +27,9 @@ testRepo = TestRepository(conn)
 # Subject Repo DB
 subjectRepo = SubjectRepository(conn)
 
+# Bot
+bot = Bot(token=BOT_TOKEN_Max)
+
 
 # Call when /start or /restart
 async def start_handler(event: types.Message):
@@ -59,18 +62,18 @@ async def test_handler(event: types.Message):
 # ---- Callback inline btn func ----
 async def test_handler2(event: types.Message):
     await event.answer('OK')
+    await bot.answer_callback_query(event.id)
+    await bot.send_message(event.from_user.id, 'Нажата первая кнопка!')
 
 
 async def test_handler3(event: types.Message):
-    subjectRepo.createSubject(name=str('Test tratata tratata'))
-    res = subjectRepo.findAllSubject()
+    res = subjectRepo.findIdSubject(name='Математика')
     print(res)
-    await event.answer("Test tratata")
+    await event.answer("TestOK")
 
 
 # ---- Main func ----
 def main():
-    bot = Bot(token=BOT_TOKEN_Max)
     try:
         disp = Dispatcher(bot=bot)
         disp.register_message_handler(start_handler, commands={"start", "restart"})
