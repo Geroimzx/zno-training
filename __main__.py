@@ -5,6 +5,10 @@ from aiogram import Bot, Dispatcher, executor, types
 from config import *
 from repository.UserRepository import *
 from repository.TestRepository import *
+from repository.SubjectRepository import *
+
+# ---- Tmp Buttons ----
+import interface.markups as nav
 
 try:
     # DB Connection
@@ -20,6 +24,9 @@ userRepo = UserRepository(conn)
 # Test Repo DB
 testRepo = TestRepository(conn)
 
+# Subject Repo DB
+subjectRepo = SubjectRepository(conn)
+
 
 # Call when /start or /restart
 async def start_handler(event: types.Message):
@@ -34,23 +41,44 @@ async def start_handler(event: types.Message):
     await event.answer(
         f"Привіт, {event.from_user.get_mention(as_html=True)} 👋!",
         parse_mode=types.ParseMode.HTML,
+        reply_markup=nav.mainMenu_inline,
+
     )
 
 
 # Call when /test
 async def test_handler(event: types.Message):
     await event.answer(
-        "[DEBUG] All subjects: " + str(testRepo.findAllSubject()) + "\nSubject id 1: " + str(testRepo.findSubjectById(1)) + "\nTest id 1 Question 1: " + str(testRepo.findQuestionByTestIdAndQuestionNumber(1, 1)),
+        "[DEBUG] All subjects: " + str(testRepo.findAllSubject()) + "\nSubject id 1: " + str(
+            testRepo.findSubjectById(1)) + "\nTest id 1 Question 1: " + str(
+            testRepo.findQuestionByTestIdAndQuestionNumber(1, 1)),
         parse_mode=types.ParseMode.HTML
     )
 
 
+# ---- Callback inline btn func ----
+async def test_handler2(event: types.Message):
+    await event.answer('OK')
+
+
+async def test_handler3(event: types.Message):
+    subjectRepo.createSubject(name=str('Test tratata tratata'))
+    res = subjectRepo.findAllSubject()
+    print(res)
+    await event.answer("Test tratata")
+
+
+# ---- Main func ----
 def main():
-    bot = Bot(token=BOT_TOKEN)
+    bot = Bot(token=BOT_TOKEN_Max)
     try:
         disp = Dispatcher(bot=bot)
         disp.register_message_handler(start_handler, commands={"start", "restart"})
         disp.register_message_handler(test_handler, commands={"test"})
+        #       ---- My test handlers ----
+        disp.register_message_handler(test_handler3, commands={"testSub"})
+        #        disp.register_message_handler(test_handler2, lambda msg: msg.text == 'Вибір року')
+        disp.register_callback_query_handler(test_handler2, lambda c: c.data == 'button1')
         executor.start_polling(disp)
     finally:
         conn.close()
