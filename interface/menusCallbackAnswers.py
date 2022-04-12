@@ -40,6 +40,7 @@ async def choosed_subject_handler(event: types.Message, state: FSMContext):
 
 
 async def choosed_year_handler(event: types.Message, state: FSMContext):
+    print(event.text)
     async with state.proxy() as data:
         data['Year'] = event
 
@@ -48,4 +49,4 @@ def register_handlers_main_menu(dp: Dispatcher):
     dp.register_message_handler(startTest_handler, lambda msg: msg.text == "📝 Почати тест", state=None)
     dp.register_callback_query_handler(choosed_subject_handler, lambda c: True,
                                        state=FSMStartTest.chooseSubject)
-    dp.register_message_handler(choosed_year_handler, lambda msg: True)
+    dp.register_message_handler(choosed_year_handler, lambda msg: True, state=FSMStartTest.chooseYear)
