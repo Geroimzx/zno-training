@@ -1,13 +1,13 @@
 import asyncio
 import psycopg2
 
-
 from aiogram import Bot, Dispatcher, executor, types
 from config import *
 from repository.UserRepository import *
 from repository.TestRepository import *
 from repository.SubjectRepository import *
-from interface import menuCallbackAnswers
+
+from interface.menuCallbackAnswers import *
 
 # ---- Tmp Buttons ----
 import interface.menusButtons as nav
@@ -80,7 +80,7 @@ def main():
         dp.register_message_handler(start_handler, commands={"start", "restart"})
         dp.register_message_handler(test_handler, commands={"test"})
         #       ---- My test handlers ----
-        menuCallbackAnswers.register_handlers_main_menu(dp)
+        register_handlers_main_menu(dp)
         dp.register_message_handler(test_handler3, commands={"testSub"})
 
         #        dp.register_message_handler(test_handler2, lambda msg: msg.text == 'Вибір року')
