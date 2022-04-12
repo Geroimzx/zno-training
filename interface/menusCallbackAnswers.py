@@ -42,6 +42,9 @@ async def choosed_subject_handler(event: types.Message, state: FSMContext):
 async def choosed_year_handler(event: types.Message, state: FSMContext):
     from __main__ import bot
     print(event.text)
+    if not event.text.isdecimal():
+        await bot.send_message(event.from_user.id, "Введіть число!!")
+        return
     async with state.proxy() as data:
         data['Year'] = event.text
     await FSMStartTest.next()
