@@ -9,9 +9,16 @@ main_menu.add(*mm_buttons)
 subj_buttons = []
 subj_menu = InlineKeyboardMarkup(row_width=3)
 
+year_array = []
 
-async def createSubjectMenu():
-    return 'Ok'
+def createSubjectMenu():
+    from __main__ import testRepo
+    res = testRepo.findAllSubject()
+    subj_buttons.clear()
+    for val in res:
+        subj_buttons.append(InlineKeyboardButton(text=F"{val[0]}", callback_data=F"subject_{val[1]}"))
+    subj_menu.inline_keyboard.clear()
+    subj_menu.add(*subj_buttons)
 
 # ---- Main menu ----
 # chooseYear = KeyboardButton('Вибір року')
