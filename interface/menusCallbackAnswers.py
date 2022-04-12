@@ -70,6 +70,9 @@ async def choosed_year_handler(event: types.Message, state: FSMContext):
         await bot.delete_message(chat_id=data['msg2'].chat.id, message_id=data['msg2'].message_id)
         await bot.delete_message(chat_id=data['user_msg'].from_user.id,
                                  message_id=data['user_msg'].message_id)
+        data.pop('msg1')
+        data.pop('msg2')
+        data.pop('user_msg')
         await bot.edit_message_text(chat_id=data['msg'].chat.id, message_id=data['msg'].message_id,
                                     text=data['msg'].text + F"\r\n{event.text}")
         res = testRepo.findAllTestBySubjectIdAndYear(data['subjId'], event.text)
