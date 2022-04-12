@@ -79,7 +79,7 @@ async def choosen_test_handler(event: types.Message, state: FSMContext):
 
 
 def register_handlers_main_menu(dp: Dispatcher):
-    dp.register_message_handler(startTest_handler, lambda msg: msg.text == "📝 Вибір предмету", state=None)
+    dp.register_message_handler(startTest_handler, lambda msg: msg.text == "📝 Вибір предмету", state="*")
     dp.register_callback_query_handler(choosed_subject_handler, lambda c: True,
                                        state=FSMStartTest.chooseSubject)
     dp.register_message_handler(choosed_year_handler, lambda msg: True, state=FSMStartTest.chooseYear)
