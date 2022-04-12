@@ -9,7 +9,7 @@ from repository.UserRepository import *
 from repository.TestRepository import *
 from repository.SubjectRepository import *
 
-from interface.menusCallbackAnswers import *
+from interface import menusCallbackAnswers
 
 # ---- Tmp Buttons ----
 import interface.menusButtons as nav
@@ -39,9 +39,11 @@ storage = MemoryStorage()
 # Call when /start or /restart
 async def start_handler(event: types.Message):
     # Test if user exist: if true - yes, false - no
-    print("[DEBUG] User ", event.from_user.id, " is exists: ",
-          userRepo.existsUserById(event.from_user.id))
-#    print(userRepo.findAllUsers())
+
+    # print("[DEBUG] User ", event.from_user.id, " is exists: ",
+    #       userRepo.existsUserById(event.from_user.id))
+    # print(userRepo.findAllUsers())
+
     # If User not exists in DB insert him data into DB
     if not userRepo.existsUserById(event.from_user.id):
         userRepo.addUser(user_id=event.from_user.id, user_name=event.from_user.username,
@@ -69,10 +71,8 @@ def main():
         dp = Dispatcher(bot=bot, storage=storage)
         dp.register_message_handler(start_handler, commands={"start", "restart"})
         dp.register_message_handler(test_handler, commands={"test"})
-        #       ---- My test handlers ----
-        register_handlers_main_menu(dp)
-        #        dp.register_message_handler(test_handler2, lambda msg: msg.text == 'Вибір року')
-        #        dp.register_callback_query_handler(test_handler2, lambda c: c.data == 'button1')
+
+        menusCallbackAnswers.register_handlers_main_menu(dp)
 
         executor.start_polling(dp)
     finally:

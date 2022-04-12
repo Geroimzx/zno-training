@@ -36,7 +36,7 @@ class TestRepository:
 
     def findAllYearBySubjectId(self, subject_id):
         with self.conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM public.\"Year\" WHERE \"Subject_id\" = %s", (subject_id,))
+            cursor.execute("SELECT * FROM public.\"Year\" WHERE \"Subject_id\" = %s ORDER BY \"Year\" ASC", (subject_id,))
             return cursor.fetchall()
 
     def existsYearSubjectId(self, subject_id):
