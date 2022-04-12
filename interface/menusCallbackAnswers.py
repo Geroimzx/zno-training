@@ -32,7 +32,7 @@ async def choosed_subject_handler(event: types.Message, state: FSMContext):
                                 text=F'{testRepo.findSubjectById(event.data.split("_")[1])[0][0]}')
 
     from interface.menusButtons import createYearList
-    msgText = "Доступні роки:\r\n";
+    msgText = "Доступні роки:\r\n"
     for val in createYearList(event.data.split('_')[1]):
         msgText += val + "\r\n"
     await bot.send_message(chat_id=event.from_user.id, text=msgText)

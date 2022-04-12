@@ -32,7 +32,7 @@ testRepo = TestRepository(conn)
 subjectRepo = SubjectRepository(conn)
 
 # Bot
-bot = Bot(token=BOT_TOKEN_Max)
+bot = Bot(token=BOT_TOKEN)
 storage = MemoryStorage()
 
 
