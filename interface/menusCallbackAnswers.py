@@ -40,9 +40,12 @@ async def choosed_subject_handler(event: types.Message, state: FSMContext):
 
 
 async def choosed_year_handler(event: types.Message, state: FSMContext):
+    from __main__ import bot
     print(event.text)
     async with state.proxy() as data:
-        data['Year'] = event
+        data['Year'] = event.text
+    await FSMStartTest.next()
+    await bot.send_message(event.from_user.id, event.text)
 
 
 def register_handlers_main_menu(dp: Dispatcher):
