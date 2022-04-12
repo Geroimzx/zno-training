@@ -29,7 +29,6 @@ async def choosed_subject_handler(event: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['msg'] = await bot.edit_message_text(chat_id=event.from_user.id, message_id=event.message.message_id,
                                                   text=F'{testRepo.findSubjectById(event.data.split("_")[1])[0][0]}')
-
     from interface.menusButtons import createYearList
     msgText = "Доступні роки:\r\n"
     for val in createYearList(event.data.split('_')[1]):
