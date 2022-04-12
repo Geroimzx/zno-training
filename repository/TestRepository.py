@@ -51,6 +51,13 @@ class TestRepository:
             cursor.execute("SELECT * FROM public.\"Test\" WHERE \"Year_id\" = %s", (year_id,))
             return cursor.fetchall()
 
+    def findAllTestBySubjectIdAndYear(self, subject_id, year):
+        with self.conn.cursor() as cursor:
+            cursor.execute("SELECT \"Year_id\" FROM public.\"Year\" WHERE \"Subject_id\" = %s AND \"Year\" = %s", (subject_id, year))
+            year_id = cursor.fetchall()[0][0]
+            cursor.execute("SELECT * FROM public.\"Test\" WHERE \"Year_id\" = %s", (year_id,))
+            return cursor.fetchall()
+
     # Question Read query
     def findAllQuestionByTestId(self, test_id):
         with self.conn.cursor() as cursor:
