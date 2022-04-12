@@ -26,16 +26,19 @@ async def choosed_subject_handler(event: types.Message, state: FSMContext):
         data['msg'] = event
         data['subjId'] = event.data.split('_')[1]
     await FSMStartTest.next()
-
-    await bot.edit_message_text(chat_id=event.from_user.id, message_id=event.message.message_id,
-                                text=F'{testRepo.findSubjectById(event.data.split("_")[1])[0][0]}')
+    async with state.proxy() as data:
+        data['msg'] = await bot.edit_message_text(chat_id=event.from_user.id, message_id=event.message.message_id,
+                                                  text=F'{testRepo.findSubjectById(event.data.split("_")[1])[0][0]}')
 
     from interface.menusButtons import createYearList
     msgText = "Доступні роки:\r\n"
     for val in createYearList(event.data.split('_')[1]):
         msgText += val + "\r\n"
-    await bot.send_message(chat_id=event.from_user.id, text=msgText)
-    await bot.send_message(chat_id=event.from_user.id, text="Введіть рік:")
+    msg1 = await bot.send_message(chat_id=event.from_user.id, text=msgText)
+    msg2 = await bot.send_message(chat_id=event.from_user.id, text="Введіть рік:")
+    async with state.proxy() as data:
+        data['msg1'] = msg1
+        data['msg2'] = msg2
 
 
 async def choosed_year_handler(event: types.Message, state: FSMContext):
@@ -47,6 +50,7 @@ async def choosed_year_handler(event: types.Message, state: FSMContext):
     yearAvailable = False
     from interface.menusButtons import createYearList
     async with state.proxy() as data:
+        data['user_msg'] = event
         for val in createYearList(data['subjId']):
             tmp = val.split('-')
             if len(tmp) > 1:
@@ -62,6 +66,12 @@ async def choosed_year_handler(event: types.Message, state: FSMContext):
 
     async with state.proxy() as data:
         data['Year'] = event.text
+        await bot.delete_message(chat_id=data['msg1'].chat.id, message_id=data['msg1'].message_id)
+        await bot.delete_message(chat_id=data['msg2'].chat.id, message_id=data['msg2'].message_id)
+        await bot.delete_message(chat_id=data['user_msg'].from_user.id,
+                                 message_id=data['user_msg'].message_id)
+        await bot.edit_message_text(chat_id=data['msg'].chat.id, message_id=data['msg'].message_id,
+                                    text=data['msg'].text + F"\r\n{event.text}")
         res = testRepo.findAllTestBySubjectIdAndYear(data['subjId'], event.text)
     await FSMStartTest.next()
 
