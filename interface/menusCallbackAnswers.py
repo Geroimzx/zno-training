@@ -25,7 +25,6 @@ async def choosed_subject_handler(event: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['msg'] = event
         data['subjId'] = event.data.split('_')[1]
-    print(event)
     await FSMStartTest.next()
 
     await bot.edit_message_text(chat_id=event.from_user.id, message_id=event.message.message_id,
@@ -41,10 +40,27 @@ async def choosed_subject_handler(event: types.Message, state: FSMContext):
 
 async def choosed_year_handler(event: types.Message, state: FSMContext):
     from __main__ import bot
-    print(event.text)
     if not event.text.isdecimal():
         await bot.send_message(event.from_user.id, "Введіть число!!")
         return
+
+    yearAvailable = False
+    from interface.menusButtons import createYearList
+    async with state.proxy() as data:
+        for val in createYearList(data['subjId']):
+            tmp = val.split('-')
+            print(len(tmp))
+            if len(tmp) > 1:
+                if int(tmp[0]) <= int(event.text) <= int(tmp[1]):
+                    yearAvailable = True
+                    break
+            elif int(event.text) == int(tmp[0]):
+                yearAvailable = True
+                break
+    if not yearAvailable:
+        await bot.send_message(event.from_user.id, "Введіть доступний рік!!")
+        return
+
     async with state.proxy() as data:
         data['Year'] = event.text
     await FSMStartTest.next()
