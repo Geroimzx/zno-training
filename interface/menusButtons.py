@@ -30,16 +30,19 @@ def createYearArr(subj_id):
     for val in res:
         if prev == -1:
             prev = int(val[1])
-            continue
-        if val - prev > 1:
             year_array.append(prev)
-        prev = val
-    year_array.append(prev)
+            continue
+
+        if int(val[1]) - int(prev) > int(1):
+            year_array.append(prev)
+        prev = int(val[1])
+    if prev > 1:
+        year_array.append(prev)
 
 
 def createYearList(subj_id):
     createYearArr(subj_id)
-    list = []
+    listYears = []
 
     index = 0
     startIndex = 0
@@ -49,19 +52,19 @@ def createYearList(subj_id):
             continue
         if year_array[index] - year_array[index - 1] > 1:
             if index - 1 - startIndex > 0:
-                list.append(F'{year_array[startIndex]}-{year_array[index - 1]}')
+                listYears.append(F'{year_array[startIndex]}-{year_array[index - 1]}')
                 startIndex = index
             else:
-                list.append(F'{year_array[index - 1]}')
+                listYears.append(F'{year_array[index - 1]}')
                 startIndex = index
         index += 1
 
     if index - 1 - startIndex > 0:
-        list.append(F'{year_array[startIndex]}-{year_array[index - 1]}')
+        listYears.append(F'{year_array[startIndex]}-{year_array[index - 1]}')
     else:
-        list.append(F'{year_array[index - 1]}')
+        listYears.append(F'{year_array[index - 1]}')
 
-    return list
+    return listYears
 
 
 
