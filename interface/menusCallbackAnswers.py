@@ -83,7 +83,8 @@ async def choosed_year_handler(event: types.Message, state: FSMContext):
     inlineSubj = types.InlineKeyboardMarkup()
     inlineSubj.inline_keyboard.clear()
     for val in res:
-        inlineSubj.add(types.InlineKeyboardButton(text=val[2]+F'({val[3]}min)', callback_data=F'testID_{val[0]}'))
+        inlineSubj.add(types.InlineKeyboardButton(text=val[2]+F'({val[3]}min)',
+                                                  callback_data=F'testID_{val[0]}_{val[3]}'))
     await bot.send_message(event.from_user.id, 'Виберіть тип тесту:', reply_markup=inlineSubj)
 
 
@@ -91,8 +92,10 @@ async def choosen_test_handler(event: types.Message, state: FSMContext):
     from __main__ import bot, testRepo
     await FSMStartTest.next()
     res = testRepo.findAllQuestionByTestId(event.data.split('_')[1])
+    async with state.proxy() as data:
+        data['Tests_data'] = res
+        data['Time_test'] = event.data.split('_')[2]
     await bot.send_message(event.from_user.id, str(res))
-    # await bot.send_message(event.from_user.id, str(event.data.split('_')[1]))
 
 
 def register_handlers_main_menu(dp: Dispatcher):
