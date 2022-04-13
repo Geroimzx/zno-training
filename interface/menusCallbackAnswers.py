@@ -43,7 +43,9 @@ async def choosed_subject_handler(event: types.Message, state: FSMContext):
 async def choosed_year_handler(event: types.Message, state: FSMContext):
     from __main__ import bot, testRepo
     if not event.text.isdecimal():
-        await bot.send_message(event.from_user.id, "Введіть число!!")
+        async with state.proxy() as data:
+            await bot.send_message(event.from_user.id, "Введіть число!!")
+        await bot.delete_message(chat_id=event.from_user.id, message_id=event.message_id)
         return
 
     yearAvailable = False
@@ -61,6 +63,7 @@ async def choosed_year_handler(event: types.Message, state: FSMContext):
                 break
     if not yearAvailable:
         await bot.send_message(event.from_user.id, "Введіть доступний рік!!")
+        await bot.delete_message(chat_id=event.from_user.id, message_id=event.message_id)
         return
 
     async with state.proxy() as data:
@@ -85,9 +88,11 @@ async def choosed_year_handler(event: types.Message, state: FSMContext):
 
 
 async def choosen_test_handler(event: types.Message, state: FSMContext):
-    from __main__ import bot
+    from __main__ import bot, testRepo
     await FSMStartTest.next()
-    await bot.send_message(event.from_user.id, event.data)
+    res = testRepo.findAllQuestionByTestId(event.data.split('_')[1])
+    await bot.send_message(event.from_user.id, str(res))
+    # await bot.send_message(event.from_user.id, str(event.data.split('_')[1]))
 
 
 def register_handlers_main_menu(dp: Dispatcher):
