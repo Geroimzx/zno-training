@@ -77,8 +77,19 @@ def getInlineTestListById(test_id):
     ans.inline_keyboard.clear()
 
     res = testRepo.findAllQuestionByTestId(test_id)
-    btn = []
+    btn = [[]]
     for val in res:
-        btn.append(InlineKeyboardButton(text=F"{val[4]}", callback_data=F"testId_{val[0]}"))
-    ans.row(*btn)
+        if len(btn[len(btn) - 1]) == 3:
+            btn.append([])
+        btn[len(btn) - 1].append(InlineKeyboardButton(text=F"{val[4]}", callback_data=F"testId_{val[0]}"))
+
+    for val in btn:
+        ans.row(*val)
+    return ans
+
+
+def getTestData(test_id, q_num):
+    from __main__ import testRepo
+    ans = testRepo.findQuestionByTestIdAndQuestionNumber(test_id, q_num)
+
     return ans

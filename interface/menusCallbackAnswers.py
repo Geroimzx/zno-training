@@ -3,7 +3,7 @@ from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-from interface.menusButtons import getInlineTestListById
+from interface.menusButtons import getInlineTestListById, getTestData
 
 
 class FSMStartTest(StatesGroup):
@@ -85,7 +85,7 @@ async def choosed_year_handler(event: types.Message, state: FSMContext):
     inlineSubj = types.InlineKeyboardMarkup()
     inlineSubj.inline_keyboard.clear()
     for val in res:
-        inlineSubj.add(types.InlineKeyboardButton(text=val[2]+F'({val[3]}min)',
+        inlineSubj.add(types.InlineKeyboardButton(text=val[2] + F'({val[3]}min)',
                                                   callback_data=F'testID_{val[0]}_{val[3]}'))
     await bot.send_message(event.from_user.id, 'Виберіть тип тесту:', reply_markup=inlineSubj)
 
@@ -99,8 +99,42 @@ async def choosen_test_handler(event: types.Message, state: FSMContext):
         data['Test_id'] = event.data.split('_')[1]
         data['Tests_data'] = res
         data['Time_test'] = event.data.split('_')[2]
-        select_inline_menu = getInlineTestListById(data['Test_id'])
-        await bot.send_message(event.from_user.id, str(res), reply_markup=select_inline_menu)
+
+        msg = getTestData(data['Test_id'], event.data.split('_')[1])
+
+        data['Test_msg'] = await bot.send_message(chat_id=event.from_user.id,
+                                                  text=F"Питання {msg[0][4]}. \r\n{msg[0][2]}",
+                                                  reply_markup=getInlineTestListById(data['Test_id']))
+        if msg[0][3] != '':
+            data['media_msg'] = await bot.send_photo(chat_id=data['Test_msg'].chat.id,
+                                                     caption=F'To {data["Test_id"]}',
+                                                     photo=msg[0][3])
+
+
+async def testChoose_handler(event: types.Message, state: FSMContext):
+    from __main__ import bot
+
+    async with state.proxy() as data:
+        # print(str(data['Test_msg']))
+        # print(event)
+        # await bot.send_message(chat_id=data['Test_msg'].chat.id, text=str(data['Test_msg'].from_user))
+        msg = getTestData(data['Test_id'], event.data.split('_')[1])
+
+        await bot.edit_message_text(chat_id=data['Test_msg'].chat.id,
+                                    message_id=data['Test_msg'].message_id,
+                                    text=F"Питання {msg[0][4]}. \r\n{msg[0][2]}",
+                                    reply_markup=getInlineTestListById(data['Test_id']))
+        if msg[0][3] != '':
+            data['media_msg'] = await bot.send_photo(chat_id=data['Test_msg'].chat.id,
+                                                     caption=F'To {data["Test_id"]}',
+                                                     photo=msg[0][3])
+        else:
+            if 'media_msg' in data.keys():
+                await bot.delete_message(chat_id=data['media_msg'].chat.id,
+                                         message_id=data['media_msg'].message_id)
+                data.pop('media_msg')
+    # if msg[0][3] != '':
+        #    await bot.send_photo(chat_id=data['Test_msg'].chat.id, photo=str(msg[0][3]))
 
 
 def register_handlers_main_menu(dp: Dispatcher):
@@ -109,3 +143,4 @@ def register_handlers_main_menu(dp: Dispatcher):
                                        state=FSMStartTest.chooseSubject)
     dp.register_message_handler(choosed_year_handler, lambda msg: True, state=FSMStartTest.chooseYear)
     dp.register_callback_query_handler(choosen_test_handler, lambda msg: True, state=FSMStartTest.chooseTestType)
+    dp.register_callback_query_handler(testChoose_handler, lambda msg: True, state=FSMStartTest.startTest)
