@@ -3,6 +3,8 @@ from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
+from interface.menusButtons import getInlineTestListById
+
 
 class FSMStartTest(StatesGroup):
     chooseSubject = State()
@@ -91,11 +93,14 @@ async def choosed_year_handler(event: types.Message, state: FSMContext):
 async def choosen_test_handler(event: types.Message, state: FSMContext):
     from __main__ import bot, testRepo
     await FSMStartTest.next()
+
     res = testRepo.findAllQuestionByTestId(event.data.split('_')[1])
     async with state.proxy() as data:
+        data['Test_id'] = event.data.split('_')[1]
         data['Tests_data'] = res
         data['Time_test'] = event.data.split('_')[2]
-    await bot.send_message(event.from_user.id, str(res))
+        select_inline_menu = getInlineTestListById(data['Test_id'])
+        await bot.send_message(event.from_user.id, str(res), reply_markup=select_inline_menu)
 
 
 def register_handlers_main_menu(dp: Dispatcher):
