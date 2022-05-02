@@ -3,7 +3,7 @@ from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-from interface.menusButtons import getInlineTestListById, getTestData
+from interface.menusButtons import getInlineTestListById, getTestData, createYearArr
 
 
 class FSMStartTest(StatesGroup):
@@ -54,6 +54,8 @@ async def choosed_year_handler(event: types.Message, state: FSMContext):
     from interface.menusButtons import createYearList
     async with state.proxy() as data:
         data['user_msg'] = event
+        #await bot.send_message(chat_id=event.from_user.id, text=str(createYearList(data['subjId'])))
+
         for val in createYearList(data['subjId']):
             tmp = val.split('-')
             if len(tmp) > 1:

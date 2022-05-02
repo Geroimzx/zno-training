@@ -30,21 +30,27 @@ def createYearArr(subj_id):
     res = testRepo.findAllYearBySubjectId(subj_id)
     year_array.clear()
     prev = -1
-    for val in res:
-        if prev == -1:
-            prev = int(val[1])
-            year_array.append(prev)
-            continue
 
-        if int(val[1]) - int(prev) > int(1):
-            year_array.append(prev)
-        prev = int(val[1])
-    if prev > 1:
-        year_array.append(prev)
+    for val in res:
+        year_array.append(int(val[1]))
+#    for val in res:
+#        if prev == -1:
+#            prev = int(val[1])
+#            year_array.append(prev)
+#            continue
+#
+#        if int(val[1]) - int(prev) > int(1):
+#            year_array.append(prev)
+#        prev = int(val[1])
+#    if prev > 1:
+#        year_array.append(prev)
 
 
 def createYearList(subj_id):
     createYearArr(subj_id)
+
+    print(year_array)
+
     listYears = []
 
     index = 0
