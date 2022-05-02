@@ -119,11 +119,17 @@ async def testChoose_handler(event: types.Message, state: FSMContext):
         # print(event)
         # await bot.send_message(chat_id=data['Test_msg'].chat.id, text=str(data['Test_msg'].from_user))
         msg = getTestData(data['Test_id'], event.data.split('_')[1])
+        if str(F"Питання {msg[0][4]}. \r\n{msg[0][2]}") == str(data['Test_msg'].text):
+            print("equal")
+            return
 
-        await bot.edit_message_text(chat_id=data['Test_msg'].chat.id,
-                                    message_id=data['Test_msg'].message_id,
-                                    text=F"Питання {msg[0][4]}. \r\n{msg[0][2]}",
-                                    reply_markup=getInlineTestListById(data['Test_id']))
+        print(data['Test_msg'].text)
+        print(str(F"Питання {msg[0][4]}. \r\n{msg[0][2]}"))
+        print(str(data['Test_msg'].text))
+        data['Test_msg'] = await bot.edit_message_text(chat_id=data['Test_msg'].chat.id,
+                                                       message_id=data['Test_msg'].message_id,
+                                                       text=F"Питання {msg[0][4]}. \r\n{msg[0][2]}",
+                                                       reply_markup=getInlineTestListById(data['Test_id']))
         if msg[0][3] != '':
             data['media_msg'] = await bot.send_photo(chat_id=data['Test_msg'].chat.id,
                                                      caption=F'To {data["Test_id"]}',
@@ -133,8 +139,6 @@ async def testChoose_handler(event: types.Message, state: FSMContext):
                 await bot.delete_message(chat_id=data['media_msg'].chat.id,
                                          message_id=data['media_msg'].message_id)
                 data.pop('media_msg')
-    # if msg[0][3] != '':
-        #    await bot.send_photo(chat_id=data['Test_msg'].chat.id, photo=str(msg[0][3]))
 
 
 def register_handlers_main_menu(dp: Dispatcher):
