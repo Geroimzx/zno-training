@@ -48,9 +48,6 @@ def createYearArr(subj_id):
 
 def createYearList(subj_id):
     createYearArr(subj_id)
-
-    print(year_array)
-
     listYears = []
 
     index = 0
