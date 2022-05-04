@@ -91,6 +91,22 @@ def getInlineTestListById(test_id):
     return ans
 
 
+def createYearInlineList(subj_id):
+    createYearArr(subj_id)
+    ans = InlineKeyboardMarkup()
+    ans.inline_keyboard.clear()
+    btn = [[]]
+    for val in year_array:
+        if len(btn[len(btn) - 1]) == 3:
+            btn.append([])
+        btn[len(btn) - 1].append(InlineKeyboardButton(text=F"{val}", callback_data=F"testYear_{val}"))
+
+    for val in btn:
+        ans.row(*val)
+
+    return ans
+
+
 def getTestData(test_id, q_num):
     from __main__ import testRepo
     ans = testRepo.findQuestionByTestIdAndQuestionNumber(test_id, q_num)
