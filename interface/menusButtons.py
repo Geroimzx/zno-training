@@ -82,7 +82,7 @@ def getInlineTestListById(test_id):
     res = testRepo.findAllQuestionByTestId(test_id)
     btn = [[]]
     for val in res:
-        if len(btn[len(btn) - 1]) == 3:
+        if len(btn[len(btn) - 1]) == 8:
             btn.append([])
         btn[len(btn) - 1].append(InlineKeyboardButton(text=F"{val[4]}", callback_data=F"testId_{val[0]}"))
 
