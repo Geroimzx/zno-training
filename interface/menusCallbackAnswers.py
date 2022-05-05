@@ -189,3 +189,4 @@ def register_handlers_main_menu(dp: Dispatcher):
 
     dp.register_callback_query_handler(choosen_test_handler, lambda msg: True, state=FSMStartTest.chooseTestType)
     dp.register_callback_query_handler(testChoose_handler, lambda msg: True, state=FSMStartTest.startTest)
+
