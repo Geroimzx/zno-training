@@ -10,6 +10,7 @@ from handler.menu_btn_handler import *
 # ---- Main func ----
 def main():
     try:
+        print(testRepo.findQuestionByTestIdAndQuestionNumber(str(30), str(4)))
         start_polling(dp, skip_updates=True)
     finally:
         conn.close()

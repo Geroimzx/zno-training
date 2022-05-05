@@ -8,7 +8,7 @@ from bot_init import *
 
 
 @dp.message_handler(lambda msg: msg.text == "📝 Вибір предмету", state="*")
-async def startTest_handler(message: types.Message):
+async def subject_handler(message: types.Message):
     from handler.menu_btn_handler import subj_menu, createSubjectMenu
     await FSMStartTest.chooseSubject.set()
     createSubjectMenu()
@@ -16,7 +16,7 @@ async def startTest_handler(message: types.Message):
 
 
 @dp.callback_query_handler(lambda c: True, state=FSMStartTest.chooseSubject)
-async def choosed_subject_handler(event: types.Message, state: FSMContext):
+async def year_handler(event: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['msg'] = event
         data['subjId'] = event.data.split('_')[1]
@@ -24,18 +24,100 @@ async def choosed_subject_handler(event: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['msg'] = await bot.edit_message_text(chat_id=event.from_user.id, message_id=event.message.message_id,
                                                   text=F'{testRepo.findSubjectById(event.data.split("_")[1])[0][0]}')
-    from handler.menu_btn_handler import createYearList
-    msgText = "Доступні роки:\r\n"
-    for val in createYearList(event.data.split('_')[1]):
-        msgText += val + "\r\n"
-    msg1 = await bot.send_message(chat_id=event.from_user.id, text=msgText)
-    # msg2 = await bot.send_message(chat_id=event.from_user.id, text="Введіть рік:")
-    msg2 = await bot.send_message(chat_id=event.from_user.id, text="Виберіть рік:",
+    msg1 = await bot.send_message(chat_id=event.from_user.id, text="Виберіть рік:",
                                   reply_markup=createYearInlineList(event.data.split('_')[1]))
-
+    print(msg1)
     async with state.proxy() as data:
-        data['msg1'] = msg1
-        data['msg2'] = msg2
+        data['msg2'] = msg1
+
+
+
+@dp.callback_query_handler(lambda msg: True, state=FSMStartTest.chooseYear)
+async def test_type_handler(event: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['Year'] = event.data.split('_')[1]
+#        await bot.delete_message(chat_id=data['msg1'].chat.id, message_id=data['msg1'].message_id)
+        await bot.delete_message(chat_id=data['msg2'].chat.id, message_id=data['msg2'].message_id)
+
+#        data.pop('msg1')
+        data.pop('msg2')
+
+        data['msg'] = await bot.edit_message_text(chat_id=data['msg'].chat.id, message_id=data['msg'].message_id,
+                                                  text=data['msg'].text + F"\r\n{event.data.split('_')[1]}")
+
+        res = testRepo.findAllTestBySubjectIdAndYear(data['subjId'], event.data.split('_')[1])
+    await FSMStartTest.next()
+
+    inlineSubj = types.InlineKeyboardMarkup()
+    inlineSubj.inline_keyboard.clear()
+    for val in res:
+        inlineSubj.add(types.InlineKeyboardButton(text=val[2] + F'({val[3]}min)',
+                                                  callback_data=F'testID_{val[0]}_{val[3]}'))
+    async with state.proxy() as data:
+        data['msg1'] = await bot.send_message(event.from_user.id, 'Виберіть тип тесту:', reply_markup=inlineSubj)
+
+
+@dp.callback_query_handler(lambda msg: True, state=FSMStartTest.startTest)
+async def question_choose_handler(event: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        # print(str(data['Test_msg']))
+        # print(event)
+        # await bot.send_message(chat_id=data['Test_msg'].chat.id, text=str(data['Test_msg'].from_user))
+        msg = getTestData(data['Test_id'], event.data.split('_')[1])
+
+        data['Test_msg'] = await bot.edit_message_text(chat_id=data['Test_msg'].chat.id,
+                                                       message_id=data['Test_msg'].message_id,
+                                                       text=F"Питання {msg[0][4]}. \r\n{msg[0][2]}",
+                                                       reply_markup=getInlineTestListById(data['Test_id']))
+        if msg[0][3] != '':
+            if 'media_msg' in data.keys():
+                await bot.delete_message(chat_id=data['media_msg'].chat.id,
+                                         message_id=data['media_msg'].message_id)
+            data['media_msg'] = await bot.send_photo(chat_id=data['Test_msg'].chat.id,
+                                                     caption=F'До {event.data.split("_")[1]} завдання',
+                                                     photo=msg[0][3])
+        else:
+            if 'media_msg' in data.keys():
+                await bot.delete_message(chat_id=data['media_msg'].chat.id,
+                                         message_id=data['media_msg'].message_id)
+                data.pop('media_msg')
+
+
+@dp.callback_query_handler(lambda msg: True, state=FSMStartTest.chooseTestType)
+async def test_question_handler(event: types.Message, state: FSMContext):
+    await FSMStartTest.next()
+
+    print(type(event.data.split('_')[1]))
+    print(event.data.split('_')[1])
+    # TODO: тут помилка: з id все норм, але TypeError: not all arguments converted during string formatting
+    res = testRepo.findAllQuestionByTestId(event.data.split('_')[1])
+
+    print(res)
+    async with state.proxy() as data:
+        data['Test_id'] = event.data.split('_')[1]
+        data['Tests_data'] = res
+        data['Time_test'] = event.data.split('_')[2]
+
+        for var in event.message.reply_markup.inline_keyboard:
+            if var[0].callback_data == event.data:
+                data['msg'] = await bot.edit_message_text(chat_id=data['msg'].chat.id,
+                                                          message_id=data['msg'].message_id,
+                                                          text=data['msg'].text + F"\r\n{var[0].text}")
+                await bot.delete_message(chat_id=data['msg1'].chat.id, message_id=data['msg1'].message_id)
+                data.pop('msg1')
+                break
+
+        msg = getTestData(data['Test_id'], event.data.split('_')[1])
+
+        data['Test_msg'] = await bot.send_message(chat_id=event.from_user.id,
+                                                  text=F"Питання {msg[0][4]}. \r\n{msg[0][2]}",
+                                                  reply_markup=getInlineTestListById(data['Test_id']))
+        if msg[0][3] != '':
+            data['media_msg'] = await bot.send_photo(chat_id=data['Test_msg'].chat.id,
+                                                     caption=F'To {data["Test_id"]}',
+                                                     photo=msg[0][3])
+
+
 
 """
 @dp.callback_query_handler(lambda msg: True, state=FSMStartTest.chooseYear)
@@ -92,82 +174,4 @@ async def choosed_year_handler(event: types.Message, state: FSMContext):
 """
 
 
-@dp.callback_query_handler(lambda msg: True, state=FSMStartTest.chooseTestType)
-async def choosen_test_handler(event: types.Message, state: FSMContext):
-    await FSMStartTest.next()
 
-    res = testRepo.findAllQuestionByTestId(event.data.split('_')[1])
-    async with state.proxy() as data:
-        data['Test_id'] = event.data.split('_')[1]
-        data['Tests_data'] = res
-        data['Time_test'] = event.data.split('_')[2]
-
-        for var in event.message.reply_markup.inline_keyboard:
-            if var[0].callback_data == event.data:
-                data['msg'] = await bot.edit_message_text(chat_id=data['msg'].chat.id,
-                                                          message_id=data['msg'].message_id,
-                                                          text=data['msg'].text + F"\r\n{var[0].text}")
-                await bot.delete_message(chat_id=data['msg1'].chat.id, message_id=data['msg1'].message_id)
-                data.pop('msg1')
-                break
-
-        msg = getTestData(data['Test_id'], event.data.split('_')[1])
-
-        data['Test_msg'] = await bot.send_message(chat_id=event.from_user.id,
-                                                  text=F"Питання {msg[0][4]}. \r\n{msg[0][2]}",
-                                                  reply_markup=getInlineTestListById(data['Test_id']))
-        if msg[0][3] != '':
-            data['media_msg'] = await bot.send_photo(chat_id=data['Test_msg'].chat.id,
-                                                     caption=F'To {data["Test_id"]}',
-                                                     photo=msg[0][3])
-
-
-@dp.callback_query_handler(lambda msg: True, state=FSMStartTest.startTest)
-async def testChoose_handler(event: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        # print(str(data['Test_msg']))
-        # print(event)
-        # await bot.send_message(chat_id=data['Test_msg'].chat.id, text=str(data['Test_msg'].from_user))
-        msg = getTestData(data['Test_id'], event.data.split('_')[1])
-
-        data['Test_msg'] = await bot.edit_message_text(chat_id=data['Test_msg'].chat.id,
-                                                       message_id=data['Test_msg'].message_id,
-                                                       text=F"Питання {msg[0][4]}. \r\n{msg[0][2]}",
-                                                       reply_markup=getInlineTestListById(data['Test_id']))
-        if msg[0][3] != '':
-            if 'media_msg' in data.keys():
-                await bot.delete_message(chat_id=data['media_msg'].chat.id,
-                                         message_id=data['media_msg'].message_id)
-            data['media_msg'] = await bot.send_photo(chat_id=data['Test_msg'].chat.id,
-                                                     caption=F'До {event.data.split("_")[1]} завдання',
-                                                     photo=msg[0][3])
-        else:
-            if 'media_msg' in data.keys():
-                await bot.delete_message(chat_id=data['media_msg'].chat.id,
-                                         message_id=data['media_msg'].message_id)
-                data.pop('media_msg')
-
-
-@dp.callback_query_handler(lambda msg: True, state=FSMStartTest.chooseYear)
-async def choosed_year_handler2(event: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        data['Year'] = event.data.split('_')[1]
-        await bot.delete_message(chat_id=data['msg1'].chat.id, message_id=data['msg1'].message_id)
-        await bot.delete_message(chat_id=data['msg2'].chat.id, message_id=data['msg2'].message_id)
-
-        data.pop('msg1')
-        data.pop('msg2')
-
-        data['msg'] = await bot.edit_message_text(chat_id=data['msg'].chat.id, message_id=data['msg'].message_id,
-                                                  text=data['msg'].text + F"\r\n{event.data.split('_')[1]}")
-
-        res = testRepo.findAllTestBySubjectIdAndYear(data['subjId'], event.data.split('_')[1])
-    await FSMStartTest.next()
-
-    inlineSubj = types.InlineKeyboardMarkup()
-    inlineSubj.inline_keyboard.clear()
-    for val in res:
-        inlineSubj.add(types.InlineKeyboardButton(text=val[2] + F'({val[3]}min)',
-                                                  callback_data=F'testID_{val[0]}_{val[3]}'))
-    async with state.proxy() as data:
-        data['msg1'] = await bot.send_message(event.from_user.id, 'Виберіть тип тесту:', reply_markup=inlineSubj)
