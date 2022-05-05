@@ -1,5 +1,8 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 
+from bot_init import *
+
+
 # Reply main menu
 main_menu = ReplyKeyboardMarkup(resize_keyboard=True)
 # Buttons
@@ -16,7 +19,6 @@ year_array = []
 
 
 def createSubjectMenu():
-    from __main__ import testRepo
     res = testRepo.findAllSubject()
     subj_buttons.clear()
     for val in res:
@@ -26,7 +28,6 @@ def createSubjectMenu():
 
 
 def createYearArr(subj_id):
-    from __main__ import testRepo
     res = testRepo.findAllYearBySubjectId(subj_id)
     year_array.clear()
     prev = -1
@@ -74,7 +75,6 @@ def createYearList(subj_id):
 
 
 def getInlineTestListById(test_id):
-    from __main__ import testRepo
 
     ans = InlineKeyboardMarkup(row_width=2)
     ans.inline_keyboard.clear()
@@ -108,7 +108,6 @@ def createYearInlineList(subj_id):
 
 
 def getTestData(test_id, q_num):
-    from __main__ import testRepo
     ans = testRepo.findQuestionByTestIdAndQuestionNumber(test_id, q_num)
 
     return ans
