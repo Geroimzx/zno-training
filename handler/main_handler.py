@@ -9,7 +9,6 @@ from bot_init import *
 
 @dp.message_handler(lambda msg: msg.text == "📝 Вибір предмету", state="*")
 async def startTest_handler(message: types.Message):
-    from __main__ import bot
     from handler.menu_btn_handler import subj_menu, createSubjectMenu
     await FSMStartTest.chooseSubject.set()
     createSubjectMenu()
@@ -18,7 +17,6 @@ async def startTest_handler(message: types.Message):
 
 @dp.callback_query_handler(lambda c: True, state=FSMStartTest.chooseSubject)
 async def choosed_subject_handler(event: types.Message, state: FSMContext):
-    from __main__ import bot, testRepo
     async with state.proxy() as data:
         data['msg'] = event
         data['subjId'] = event.data.split('_')[1]
@@ -96,7 +94,6 @@ async def choosed_year_handler(event: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(lambda msg: True, state=FSMStartTest.chooseTestType)
 async def choosen_test_handler(event: types.Message, state: FSMContext):
-    from __main__ import bot, testRepo
     await FSMStartTest.next()
 
     res = testRepo.findAllQuestionByTestId(event.data.split('_')[1])
@@ -127,8 +124,6 @@ async def choosen_test_handler(event: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(lambda msg: True, state=FSMStartTest.startTest)
 async def testChoose_handler(event: types.Message, state: FSMContext):
-    from __main__ import bot
-
     async with state.proxy() as data:
         # print(str(data['Test_msg']))
         # print(event)
@@ -155,8 +150,6 @@ async def testChoose_handler(event: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(lambda msg: True, state=FSMStartTest.chooseYear)
 async def choosed_year_handler2(event: types.Message, state: FSMContext):
-    from __main__ import bot, testRepo
-
     async with state.proxy() as data:
         data['Year'] = event.data.split('_')[1]
         await bot.delete_message(chat_id=data['msg1'].chat.id, message_id=data['msg1'].message_id)
