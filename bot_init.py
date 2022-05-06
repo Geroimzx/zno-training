@@ -9,7 +9,7 @@ from repository.repository_init import *
 
 
 # Bot
-bot = Bot(token=M_TOKEN)
+bot = Bot(token=BOT_TOKEN_Max)
 storage = MemoryStorage()
 dp = Dispatcher(bot=bot, storage=storage)
 
