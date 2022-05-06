@@ -12,23 +12,22 @@ async def subject_handler(message: types.Message):
     from keyboard.inline_keyboard import subject_menu, init_subject_inline_menu
     await FSMStartTest.chooseSubject.set()
     init_subject_inline_menu()
-    obj_message = await bot.send_message(message.from_user.id, 'Виберіть предмет:', reply_markup=subject_menu)
+    await bot.send_message(message.from_user.id, 'Виберіть предмет:', reply_markup=subject_menu)
 
 
 @dp.callback_query_handler(lambda c: True, state=FSMStartTest.chooseSubject)
 async def year_handler(event: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['msg'] = event
-        data['subjId'] = event.data.split('_')[1]
+        data['subjectId'] = event.data.split('_')[1]
     await FSMStartTest.next()
     async with state.proxy() as data:
         data['msg'] = await bot.edit_message_text(chat_id=event.from_user.id, message_id=event.message.message_id,
                                                   text=F'{testRepo.findSubjectById(event.data.split("_")[1])[0][0]}')
-    msg1 = await bot.send_message(chat_id=event.from_user.id, text="Виберіть рік:",
-                                  reply_markup=createYearInlineList(event.data.split('_')[1]))
-    print(msg1)
+    enter_year_button = await bot.send_message(chat_id=event.from_user.id, text="Виберіть рік:",
+                                  reply_markup=init_year_inline_button(event.data.split('_')[1]))
     async with state.proxy() as data:
-        data['msg2'] = msg1
+        data['enter_year_button'] = enter_year_button
 
 
 @dp.callback_query_handler(lambda msg: True, state=FSMStartTest.chooseYear)
@@ -36,14 +35,14 @@ async def test_type_handler(event: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['Year'] = event.data.split('_')[1]
 
-        await bot.delete_message(chat_id=data['msg2'].chat.id, message_id=data['msg2'].message_id)
+        await bot.delete_message(chat_id=data['enter_year_button'].chat.id, message_id=data['enter_year_button'].message_id)
 
-        data.pop('msg2')
+        data.pop('enter_year_button')
 
         data['msg'] = await bot.edit_message_text(chat_id=data['msg'].chat.id, message_id=data['msg'].message_id,
                                                   text=data['msg'].text + F"\r\n{event.data.split('_')[1]}")
 
-        res = testRepo.findAllTestBySubjectIdAndYear(data['subjId'], event.data.split('_')[1])
+        res = testRepo.findAllTestBySubjectIdAndYear(data['subjectId'], event.data.split('_')[1])
     await FSMStartTest.next()
 
     inlineSubj = types.InlineKeyboardMarkup()
@@ -107,6 +106,3 @@ async def test_question_handler(event: types.Message, state: FSMContext):
             data['media_msg'] = await bot.send_photo(chat_id=data['Test_msg'].chat.id,
                                                      caption=F'To {data["Test_id"]}',
                                                      photo=msg[0][3])
-
-
-

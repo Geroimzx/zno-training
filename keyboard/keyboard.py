@@ -8,4 +8,4 @@ keyboard_buttons = ["📝 Вибір предмету", "🗂 Мої резул�
 keyboard.add(*keyboard_buttons)
 
 # Return to menu button
-return_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton("◀️Повернутися"))
+return_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton("◀ Повернутися"))
