@@ -9,10 +9,10 @@ from bot_init import *
 
 @dp.message_handler(lambda msg: msg.text == "📝 Вибір предмету", state="*")
 async def subject_handler(message: types.Message):
-    from keyboard.inline_keyboard import subj_menu, createSubjectMenu
+    from keyboard.inline_keyboard import subject_menu, init_subject_inline_menu
     await FSMStartTest.chooseSubject.set()
-    createSubjectMenu()
-    obj_message = await bot.send_message(message.from_user.id, 'Виберіть предмет:', reply_markup=subj_menu)
+    init_subject_inline_menu()
+    obj_message = await bot.send_message(message.from_user.id, 'Виберіть предмет:', reply_markup=subject_menu)
 
 
 @dp.callback_query_handler(lambda c: True, state=FSMStartTest.chooseSubject)

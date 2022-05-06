@@ -3,19 +3,19 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from bot_init import *
 
 
-subj_buttons = []
-subj_menu = InlineKeyboardMarkup(row_width=3)
+subject_buttons = []
+subject_menu = InlineKeyboardMarkup(row_width=3)
 
 year_array = []
 
 
-def createSubjectMenu():
-    res = testRepo.findAllSubject()
-    subj_buttons.clear()
-    for val in res:
-        subj_buttons.append(InlineKeyboardButton(text=F"{val[0]}", callback_data=F"subject_{val[1]}"))
-    subj_menu.inline_keyboard.clear()
-    subj_menu.add(*subj_buttons)
+def init_subject_inline_menu():
+    subject_data_array = testRepo.findAllSubject()
+    subject_buttons.clear()
+    for subject_data in subject_data_array:
+        subject_buttons.append(InlineKeyboardButton(text=F"{subject_data[0]}", callback_data=F"subject_{subject_data[1]}"))
+    subject_menu.inline_keyboard.clear()
+    subject_menu.add(*subject_buttons)
 
 
 def createYearArr(subj_id):
