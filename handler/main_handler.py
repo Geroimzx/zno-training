@@ -2,14 +2,14 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 from state.FSMStartTest import *
-from handler.menu_btn_handler import getInlineTestListById, getTestData, createYearInlineList
+from keyboard.inline_keyboard import *
 
 from bot_init import *
 
 
 @dp.message_handler(lambda msg: msg.text == "📝 Вибір предмету", state="*")
 async def subject_handler(message: types.Message):
-    from handler.menu_btn_handler import subj_menu, createSubjectMenu
+    from keyboard.inline_keyboard import subj_menu, createSubjectMenu
     await FSMStartTest.chooseSubject.set()
     createSubjectMenu()
     obj_message = await bot.send_message(message.from_user.id, 'Виберіть предмет:', reply_markup=subj_menu)
@@ -35,10 +35,9 @@ async def year_handler(event: types.Message, state: FSMContext):
 async def test_type_handler(event: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['Year'] = event.data.split('_')[1]
-#        await bot.delete_message(chat_id=data['msg1'].chat.id, message_id=data['msg1'].message_id)
+
         await bot.delete_message(chat_id=data['msg2'].chat.id, message_id=data['msg2'].message_id)
 
-#        data.pop('msg1')
         data.pop('msg2')
 
         data['msg'] = await bot.edit_message_text(chat_id=data['msg'].chat.id, message_id=data['msg'].message_id,
@@ -59,9 +58,6 @@ async def test_type_handler(event: types.Message, state: FSMContext):
 @dp.callback_query_handler(lambda msg: True, state=FSMStartTest.startTest)
 async def question_choose_handler(event: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        # print(str(data['Test_msg']))
-        # print(event)
-        # await bot.send_message(chat_id=data['Test_msg'].chat.id, text=str(data['Test_msg'].from_user))
         msg = getTestData(data['Test_id'], event.data.split('_')[1])
 
         data['Test_msg'] = await bot.edit_message_text(chat_id=data['Test_msg'].chat.id,
@@ -86,12 +82,8 @@ async def question_choose_handler(event: types.Message, state: FSMContext):
 async def test_question_handler(event: types.Message, state: FSMContext):
     await FSMStartTest.next()
 
-    print(type(event.data.split('_')[1]))
-    print(event.data.split('_')[1])
-    # TODO: тут помилка: з id все норм, але TypeError: not all arguments converted during string formatting
     res = testRepo.findAllQuestionByTestId(event.data.split('_')[1])
 
-    print(res)
     async with state.proxy() as data:
         data['Test_id'] = event.data.split('_')[1]
         data['Tests_data'] = res
@@ -115,62 +107,6 @@ async def test_question_handler(event: types.Message, state: FSMContext):
             data['media_msg'] = await bot.send_photo(chat_id=data['Test_msg'].chat.id,
                                                      caption=F'To {data["Test_id"]}',
                                                      photo=msg[0][3])
-
-
-
-"""
-@dp.callback_query_handler(lambda msg: True, state=FSMStartTest.chooseYear)
-async def choosed_year_handler(event: types.Message, state: FSMContext):
-    from __main__ import bot, testRepo
-    if not event.text.isdecimal():
-        async with state.proxy() as data:
-            await bot.send_message(event.from_user.id, "Введіть число!!")
-        await bot.delete_message(chat_id=event.from_user.id, message_id=event.message_id)
-        return
-
-    yearAvailable = False
-    from interface.menusButtons import createYearList
-    async with state.proxy() as data:
-        data['user_msg'] = event
-        # await bot.send_message(chat_id=event.from_user.id, text=str(createYearList(data['subjId'])))
-
-        for val in createYearList(data['subjId']):
-            tmp = val.split('-')
-            if len(tmp) > 1:
-                if int(tmp[0]) <= int(event.text) <= int(tmp[1]):
-                    yearAvailable = True
-                    break
-            elif int(event.text) == int(tmp[0]):
-                yearAvailable = True
-                break
-    if not yearAvailable:
-        await bot.send_message(event.from_user.id, "Введіть доступний рік!!")
-        await bot.delete_message(chat_id=event.from_user.id, message_id=event.message_id)
-        return
-
-    async with state.proxy() as data:
-        data['Year'] = event.text
-        await bot.delete_message(chat_id=data['msg1'].chat.id, message_id=data['msg1'].message_id)
-        await bot.delete_message(chat_id=data['msg2'].chat.id, message_id=data['msg2'].message_id)
-        await bot.delete_message(chat_id=data['user_msg'].from_user.id,
-                                 message_id=data['user_msg'].message_id)
-        data.pop('msg1')
-        data.pop('msg2')
-        data.pop('user_msg')
-        await bot.edit_message_text(chat_id=data['msg'].chat.id, message_id=data['msg'].message_id,
-                                    text=data['msg'].text + F"\r\n{event.text}")
-        res = testRepo.findAllTestBySubjectIdAndYear(data['subjId'], event.text)
-
-    inlineSubj = types.InlineKeyboardMarkup()
-    inlineSubj.inline_keyboard.clear()
-    for val in res:
-        inlineSubj.add(types.InlineKeyboardButton(text=val[2] + F'({val[3]}min)',
-                                                  callback_data=F'testID_{val[0]}_{val[3]}'))
-    async with state.proxy() as data:
-        data['msg1'] = await bot.send_message(event.from_user.id, 'Виберіть тип тесту:', reply_markup=inlineSubj)
-
-    await FSMStartTest.next()
-"""
 
 
 

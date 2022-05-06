@@ -3,7 +3,7 @@ from aiogram import types
 from bot_init import *
 
 # ---- Tmp Buttons ----
-import handler.menu_btn_handler as nav
+import keyboard.keyboard as nav
 
 
 # Call when /start or /restart
@@ -16,7 +16,7 @@ async def start_handler(event: types.Message):
     await event.answer(
         f"Привіт, {event.from_user.get_mention(as_html=True)} 👋!",
         parse_mode=types.ParseMode.HTML,
-        reply_markup=nav.main_menu,
+        reply_markup=nav.keyboard,
     )
 
 

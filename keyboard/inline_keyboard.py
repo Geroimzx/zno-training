@@ -1,16 +1,7 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot_init import *
 
-
-# Reply main menu
-main_menu = ReplyKeyboardMarkup(resize_keyboard=True)
-# Buttons
-mm_buttons = ["📝 Вибір предмету", "🗂 Мої результати"]
-main_menu.add(*mm_buttons)
-
-# Return to menu button
-return_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton("◀️Повернутися"))
 
 subj_buttons = []
 subj_menu = InlineKeyboardMarkup(row_width=3)
