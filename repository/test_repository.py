@@ -12,8 +12,9 @@ class TestRepository:
 
     def createUserAnswer(self, user_answer_id, user_test_id, question_id, answer):
         with self.conn.cursor() as cursor:
-            cursor.execute("INSERT INTO public.\"UserAnswer\"(\"UserAnswer_id\", \"Question_id\", \"UserTest_id\", \"Answer\") VALUES(%s, %s, %s, %s)",
-                           (user_answer_id, user_test_id, question_id, answer))
+            cursor.execute(
+                "INSERT INTO public.\"UserAnswer\"(\"UserAnswer_id\", \"Question_id\", \"UserTest_id\", \"Answer\") VALUES(%s, %s, %s, %s)",
+                (user_answer_id, user_test_id, question_id, answer))
 
     # Read query
 
@@ -36,7 +37,8 @@ class TestRepository:
 
     def findAllYearBySubjectId(self, subject_id):
         with self.conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM public.\"Year\" WHERE \"Subject_id\" = %s", (subject_id,))
+            cursor.execute("SELECT * FROM public.\"Year\" WHERE \"Subject_id\" = %s ORDER BY \"Year\" ASC",
+                           (subject_id,))
             return cursor.fetchall()
 
     def existsYearSubjectId(self, subject_id):
@@ -51,18 +53,26 @@ class TestRepository:
             cursor.execute("SELECT * FROM public.\"Test\" WHERE \"Year_id\" = %s", (year_id,))
             return cursor.fetchall()
 
+    def findAllTestBySubjectIdAndYear(self, subject_id, year):
+        with self.conn.cursor() as cursor:
+            cursor.execute("SELECT \"Year_id\" FROM public.\"Year\" WHERE \"Subject_id\" = %s AND \"Year\" = %s",
+                           (subject_id, year))
+            year_id = cursor.fetchall()[0][0]
+            cursor.execute("SELECT * FROM public.\"Test\" WHERE \"Year_id\" = %s", (year_id,))
+            return cursor.fetchall()
+
     # Question Read query
     def findAllQuestionByTestId(self, test_id):
         with self.conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM public.\"Question\" WHERE \"Test_id\" = %s \"ORDER BY QuestionNumber\"",
+            cursor.execute("SELECT * FROM public.\"Question\" WHERE \"Test_id\" = %s ORDER BY \"Question_number\"",
                            (test_id,))
             return cursor.fetchall()
 
     def findQuestionByTestIdAndQuestionNumber(self, test_id, question_number):
         with self.conn.cursor() as cursor:
-            cursor.execute(
-                "SELECT * FROM public.\"Question\" WHERE \"Test_id\" = %s AND \"Question_number\" = %s ORDER BY \"Question_number\"",
-                (test_id, question_number,))
+            cursor.execute("SELECT * FROM public.\"Question\" WHERE \"Test_id\" = %s AND \"Question_number\" = %s "
+                           "ORDER BY \"Question_number\"",
+                           (test_id, question_number,))
             return cursor.fetchall()
 
     # Answer Read query
