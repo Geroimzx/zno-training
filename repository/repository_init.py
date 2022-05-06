@@ -1,3 +1,3 @@
-from repository.UserRepository import *
-from repository.TestRepository import *
-from repository.SubjectRepository import *
+from repository.user_repository import *
+from repository.test_repository import *
+from repository.subject_repository import *
