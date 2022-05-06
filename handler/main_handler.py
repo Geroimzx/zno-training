@@ -31,7 +31,6 @@ async def year_handler(event: types.Message, state: FSMContext):
         data['msg2'] = msg1
 
 
-
 @dp.callback_query_handler(lambda msg: True, state=FSMStartTest.chooseYear)
 async def test_type_handler(event: types.Message, state: FSMContext):
     async with state.proxy() as data:

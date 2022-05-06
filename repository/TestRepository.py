@@ -65,7 +65,7 @@ class TestRepository:
     def findAllQuestionByTestId(self, test_id):
         with self.conn.cursor() as cursor:
             cursor.execute("SELECT * FROM public.\"Question\" WHERE \"Test_id\" = %s ORDER BY \"Question_number\"",
-                           test_id)
+                           (test_id,))
             return cursor.fetchall()
 
     def findQuestionByTestIdAndQuestionNumber(self, test_id, question_number):
