@@ -53,6 +53,37 @@ async def test_type_handler(event: types.Message, state: FSMContext):
         data['msg1'] = await bot.send_message(event.from_user.id, 'Виберіть тип тесту:', reply_markup=inline_subj)
 
 
+@dp.callback_query_handler(lambda msg: True, state=FSMStartTest.chooseTestType)
+async def test_question_handler(event: types.Message, state: FSMContext):
+    await FSMStartTest.next()
+
+    res = testRepo.findAllQuestionByTestId(event.data.split('_')[1])
+
+    async with state.proxy() as data:
+        data['Test_id'] = event.data.split('_')[1]
+        data['Tests_data'] = res
+        data['Time_test'] = event.data.split('_')[2]
+
+        for var in event.message.reply_markup.inline_keyboard:
+            if var[0].callback_data == event.data:
+                data['msg'] = await bot.edit_message_text(chat_id=data['msg'].chat.id,
+                                                          message_id=data['msg'].message_id,
+                                                          text=data['msg'].text + F"\r\n{var[0].text}")
+                await bot.delete_message(chat_id=data['msg1'].chat.id, message_id=data['msg1'].message_id)
+                data.pop('msg1')
+                break
+
+        msg = getTestData(data['Test_id'], 1)
+        print(msg)
+        data['Test_msg'] = await bot.send_message(chat_id=event.from_user.id,
+                                                  text=F"Питання {msg[0][4]}. \r\n{msg[0][2]}",
+                                                  reply_markup=getInlineTestListById(data['Test_id']))
+        if msg[0][3] != '':
+            data['media_msg'] = await bot.send_photo(chat_id=data['Test_msg'].chat.id,
+                                                     caption=F'До 1 завдання',
+                                                     photo=msg[0][3])
+
+
 @dp.callback_query_handler(lambda msg: True, state=FSMStartTest.startTest)
 async def question_choose_handler(event: types.Message, state: FSMContext):
     async with state.proxy() as data:
@@ -76,32 +107,10 @@ async def question_choose_handler(event: types.Message, state: FSMContext):
                 data.pop('media_msg')
 
 
-@dp.callback_query_handler(lambda msg: True, state=FSMStartTest.chooseTestType)
-async def test_question_handler(event: types.Message, state: FSMContext):
-    await FSMStartTest.next()
-
-    res = testRepo.findAllQuestionByTestId(event.data.split('_')[1])
-
-    async with state.proxy() as data:
-        data['Test_id'] = event.data.split('_')[1]
-        data['Tests_data'] = res
-        data['Time_test'] = event.data.split('_')[2]
-
-        for var in event.message.reply_markup.inline_keyboard:
-            if var[0].callback_data == event.data:
-                data['msg'] = await bot.edit_message_text(chat_id=data['msg'].chat.id,
-                                                          message_id=data['msg'].message_id,
-                                                          text=data['msg'].text + F"\r\n{var[0].text}")
-                await bot.delete_message(chat_id=data['msg1'].chat.id, message_id=data['msg1'].message_id)
-                data.pop('msg1')
-                break
-
-        msg = getTestData(data['Test_id'], event.data.split('_')[1])
-
-        data['Test_msg'] = await bot.send_message(chat_id=event.from_user.id,
-                                                  text=F"Питання {msg[0][4]}. \r\n{msg[0][2]}",
-                                                  reply_markup=getInlineTestListById(data['Test_id']))
-        if msg[0][3] != '':
-            data['media_msg'] = await bot.send_photo(chat_id=data['Test_msg'].chat.id,
-                                                     caption=F'To {data["Test_id"]}',
-                                                     photo=msg[0][3])
+@dp.message_handler(lambda msg: msg.text == '❌ Скасувати', state="*")
+async def cancel_handler(message: types.Message, state: FSMContext):
+    cur_state = await state.get_state()
+    if cur_state is None:
+        return
+    await state.finish()
+    await message.answer('✅', reply=True)
