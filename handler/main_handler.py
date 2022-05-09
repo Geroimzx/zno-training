@@ -74,13 +74,11 @@ async def test_question_handler(event: types.Message, state: FSMContext):
                 break
 
         msg = getTestData(data['Test_id'], 1)
-        print(msg)
         data['Test_msg'] = await bot.send_message(chat_id=event.from_user.id,
                                                   text=F"Питання {msg[0][4]}. \r\n{msg[0][2]}",
-                                                  reply_markup=getInlineTestListById(data['Test_id']))
+                                                  reply_markup=getInlineTestListById(data['Test_id'], 1))
         if msg[0][3] != '':
             data['media_msg'] = await bot.send_photo(chat_id=data['Test_msg'].chat.id,
-                                                     caption=F'До 1 завдання',
                                                      photo=msg[0][3])
 
 
@@ -92,7 +90,7 @@ async def question_choose_handler(event: types.Message, state: FSMContext):
         data['Test_msg'] = await bot.edit_message_text(chat_id=data['Test_msg'].chat.id,
                                                        message_id=data['Test_msg'].message_id,
                                                        text=F"Питання {msg[0][4]}. \r\n{msg[0][2]}",
-                                                       reply_markup=getInlineTestListById(data['Test_id']))
+                                                       reply_markup=getInlineTestListById(data['Test_id'], msg[0][4]))
         if msg[0][3] != '':
             if 'media_msg' in data.keys():
                 await bot.delete_message(chat_id=data['media_msg'].chat.id,
