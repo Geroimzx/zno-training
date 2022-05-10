@@ -5,10 +5,10 @@ class TestRepository:
     # Create query
 
     # UserTest Create query
-    def createUserTest(self, user_test_id, user_id):
+    def createUserTest(self, user_test_id, user_id, test_id, test_started):
         with self.conn.cursor() as cursor:
-            cursor.execute("INSERT INTO public.\"UserTest\"(\"UserTest_id\", \"User_id\") VALUES(%s, %s)",
-                           (user_test_id, user_id))
+            cursor.execute("INSERT INTO public.\"UserTest\"(\"UserTest_id\", \"User_id\", \"Test_id\", \"Test_started\") VALUES(%s, %s, %s, %s)",
+                           (user_test_id, user_id, test_id, test_started))
 
     def createUserAnswer(self, user_answer_id, user_test_id, question_id, answer):
         with self.conn.cursor() as cursor:

@@ -47,7 +47,7 @@ async def test_type_handler(event: types.Message, state: FSMContext):
     inline_subj = types.InlineKeyboardMarkup()
     inline_subj.inline_keyboard.clear()
     for val in res:
-        inline_subj.add(types.InlineKeyboardButton(text=val[2] + F'({val[3]}min)',
+        inline_subj.add(types.InlineKeyboardButton(text=val[2] + F'({val[3]}хв)',
                                                    callback_data=F'testID_{val[0]}_{val[3]}'))
     async with state.proxy() as data:
         data['msg1'] = await bot.send_message(event.from_user.id, 'Виберіть тип тесту:', reply_markup=inline_subj)
@@ -68,7 +68,7 @@ async def test_question_handler(event: types.Message, state: FSMContext):
             if var[0].callback_data == event.data:
                 data['msg'] = await bot.edit_message_text(chat_id=data['msg'].chat.id,
                                                           message_id=data['msg'].message_id,
-                                                          text=data['msg'].text + F"\r\n{var[0].text}")
+                                                          text="🔖" + data['msg'].text + F"\r\n📄{var[0].text}")
                 await bot.delete_message(chat_id=data['msg1'].chat.id, message_id=data['msg1'].message_id)
                 data.pop('msg1')
                 break
