@@ -5,5 +5,6 @@ class FSMStartTest(StatesGroup):
     chooseSubject = State()
     chooseYear = State()
     chooseTestType = State()
+    waitForUser = State()
     startTest = State()
     endTest = State()

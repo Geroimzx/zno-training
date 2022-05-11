@@ -62,3 +62,13 @@ def getInlineTestListById(test_id, current_test_number):
 def getTestData(test_id, q_num):
     ans = testRepo.findQuestionByTestIdAndQuestionNumber(test_id, q_num)
     return ans
+
+
+def init_start_stop_test_keyboard(state):
+    ans = InlineKeyboardMarkup(row_width=2)
+    ans.inline_keyboard.clear()
+    if state == 0:
+        ans.add(InlineKeyboardButton(text="Почати тест", callback_data="Start"))
+    else:
+        ans.add(InlineKeyboardButton(text="Закінчити тест", callback_data="Stop"))
+    return ans

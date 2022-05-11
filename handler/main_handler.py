@@ -68,11 +68,21 @@ async def test_question_handler(event: types.Message, state: FSMContext):
             if var[0].callback_data == event.data:
                 data['msg'] = await bot.edit_message_text(chat_id=data['msg'].chat.id,
                                                           message_id=data['msg'].message_id,
-                                                          text="🔖" + data['msg'].text + F"\r\n📄{var[0].text}")
+                                                          text="🔖" + data['msg'].text + F"\r\n📄{var[0].text}",
+                                                          reply_markup=init_start_stop_test_keyboard(0))
+
                 await bot.delete_message(chat_id=data['msg1'].chat.id, message_id=data['msg1'].message_id)
                 data.pop('msg1')
                 break
 
+@dp.callback_query_handler(lambda msg: msg.data == 'Start', state=FSMStartTest.waitForUser)
+async def start_test_handler(event: types.Message, state: FSMContext):
+    await FSMStartTest.next()
+
+    async with state.proxy() as data:
+        data['msg'] = await bot.edit_message_reply_markup(chat_id=data['msg'].chat.id,
+                                                          message_id=data['msg'].message_id,
+                                                          reply_markup=init_start_stop_test_keyboard(1))
         msg = getTestData(data['Test_id'], 1)
         data['Test_msg'] = await bot.send_message(chat_id=event.from_user.id,
                                                   text=F"Питання {msg[0][4]}. \r\n{msg[0][2]}",
