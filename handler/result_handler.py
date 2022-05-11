@@ -25,8 +25,9 @@ async def result_view_handler(event: types.Message, state: FSMContext):
     async with state.proxy() as data:
         user_test = testRepo.findUserTestWithTestNameByUserTestId(event.data.split("_")[1])
         user_data_parsed_list = F"\nНазва тесту:\n{str(user_test[8])}" \
-                                F"\nЧас початку:\n{str(user_test[3])}" \
-                                F"\nЧас завершення:\n{str(user_test[4])}" \
+                                F"\nЧас початку:\n{str(user_test[3]).split('.')[0]}" \
+                                F"\nЧас завершення:\n{str(user_test[4]).split('.')[0]}" \
                                 F"\nВитрачено часу: {str(user_test[4] - user_test[3]).split('.')[0]}" \
                                 F"\nОцінка: {str(user_test[2])}"
     await bot.send_message(event.from_user.id, '🗂 Мої результати\n' + user_data_parsed_list)
+    await state.finish()
