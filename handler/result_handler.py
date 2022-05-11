@@ -25,7 +25,6 @@ async def result_view_handler(event: types.Message, state: FSMContext):
         user_test = testRepo.findUserTestWithTestNameByUserTestId(str(data['user_test_id']))
         start_time = user_test[3]
         finish_time = user_test[4]
-        print(user_test)
         user_data_parsed_list = F"\n📝 Назва тесту:\n{str(user_test[8])}" \
                                 F"\n⏳ Час початку:\n{str(start_time).split('.')[0]}" \
                                 F"\n⌛ Час завершення:\n{str(finish_time).split('.')[0]}" \

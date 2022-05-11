@@ -68,9 +68,9 @@ def init_start_stop_test_keyboard(state):
     ans = InlineKeyboardMarkup(row_width=2)
     ans.inline_keyboard.clear()
     if state == 0:
-        ans.add(InlineKeyboardButton(text="Почати тест", callback_data="Start"))
+        ans.add(InlineKeyboardButton(text="Розпочати тест", callback_data="Start"))
     else:
-        ans.add(InlineKeyboardButton(text="Закінчити тест", callback_data="Stop"))
+        ans.add(InlineKeyboardButton(text="Завершити тест", callback_data="Stop"))
     return ans
 
 
