@@ -5,15 +5,21 @@ class TestRepository:
     # Create query
 
     # UserTest Create query
-    def createUserTest(self, user_test_id, user_id, test_id, test_started):
+    def createUserTest(self, user_id, test_id, test_started):
         with self.conn.cursor() as cursor:
-            cursor.execute("INSERT INTO public.\"UserTest\"(\"UserTest_id\", \"User_id\", \"Test_id\", \"Test_started\") VALUES(%s, %s, %s, %s)",
-                           (user_test_id, user_id, test_id, test_started))
+            cursor.execute("INSERT INTO public.\"UserTest\"(\"User_id\", \"Test_id\", \"Test_started\") VALUES(%s, "
+                           "%s, %s)",
+                           (user_id, test_id, test_started))
+            cursor.execute('SELECT "UserTest_id" FROM "UserTest" WHERE "User_id" = %s AND "Test_id" = %s '
+                           'AND "Test_started" = %s',
+                           (user_id, test_id, test_started))
+            return cursor.fetchall()[0][0]
 
     def createUserAnswer(self, user_answer_id, user_test_id, question_id, answer):
         with self.conn.cursor() as cursor:
             cursor.execute(
-                "INSERT INTO public.\"UserAnswer\"(\"UserAnswer_id\", \"Question_id\", \"UserTest_id\", \"Answer\") VALUES(%s, %s, %s, %s)",
+                "INSERT INTO public.\"UserAnswer\"(\"UserAnswer_id\", \"Question_id\", \"UserTest_id\", \"Answer\") "
+                "VALUES(%s, %s, %s, %s)",
                 (user_answer_id, user_test_id, question_id, answer))
 
     # Read query
@@ -97,7 +103,8 @@ class TestRepository:
     def findAllUserAnswerByUserTestIdWithQuestion(self, user_test_id):
         with self.conn.cursor() as cursor:
             cursor.execute(
-                "SELECT * FROM public.\"UserAnswer\" a WHERE \"UserTest_id\" = %s LEFT JOIN public.\"Question\" q ON a.\"Question_id\" = q.\"Question_id\"",
+                "SELECT * FROM public.\"UserAnswer\" a WHERE \"UserTest_id\" = %s LEFT JOIN public.\"Question\" q ON "
+                "a.\"Question_id\" = q.\"Question_id\"",
                 (user_test_id,))
             return cursor.fetchall()
 

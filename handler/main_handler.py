@@ -6,6 +6,8 @@ from keyboard.inline_keyboard import *
 
 from bot_init import *
 
+from datetime import datetime
+import pytz
 
 @dp.message_handler(lambda msg: msg.text == "📝 Вибір предмету", state="*")
 async def subject_handler(message: types.Message):
@@ -75,6 +77,7 @@ async def test_question_handler(event: types.Message, state: FSMContext):
                 data.pop('msg1')
                 break
 
+
 @dp.callback_query_handler(lambda msg: msg.data == 'Start', state=FSMStartTest.waitForUser)
 async def start_test_handler(event: types.Message, state: FSMContext):
     await FSMStartTest.next()
@@ -89,7 +92,19 @@ async def start_test_handler(event: types.Message, state: FSMContext):
                                                   reply_markup=getInlineTestListById(data['Test_id'], 1))
         if msg[0][3] != '':
             data['media_msg'] = await bot.send_photo(chat_id=data['Test_msg'].chat.id,
-                                                     photo=msg[0][3])
+                                                     photo=msg[0][3],
+                                                     caption='До 1 завдання')
+
+        tz_UA = pytz.timezone('Europe/Kiev')
+        data['Start time'] = datetime.now(tz_UA)
+        data['Record_user_test_id'] = testRepo.createUserTest(event.from_user.id, data['Test_id'], data['Start time'])
+
+
+# Finish test state
+@dp.callback_query_handler(lambda msg: msg.data == "Stop", state=FSMStartTest.startTest)
+async def question_choose_handler(event: types.Message, state: FSMContext):
+    await FSMStartTest.next()
+    await event.answer(text="Closed")
 
 
 @dp.callback_query_handler(lambda msg: True, state=FSMStartTest.startTest)
