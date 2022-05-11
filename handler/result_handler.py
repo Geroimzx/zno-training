@@ -20,14 +20,24 @@ async def result_view_handler(event: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['msg'] = event
         data['user_test_id'] = event.data.split('_')[1]
-        data['user_test_name'] = testRepo.findTestByTestId(event.data.split("_")[1])
     await FSMResult.next()
     async with state.proxy() as data:
-        user_test = testRepo.findUserTestWithTestNameByUserTestId(event.data.split("_")[1])
-        user_data_parsed_list = F"\nНазва тесту:\n{str(user_test[8])}" \
-                                F"\nЧас початку:\n{str(user_test[3]).split('.')[0]}" \
-                                F"\nЧас завершення:\n{str(user_test[4]).split('.')[0]}" \
-                                F"\nВитрачено часу: {str(user_test[4] - user_test[3]).split('.')[0]}" \
-                                F"\nОцінка: {str(user_test[2])}"
-    await bot.send_message(event.from_user.id, '🗂 Мої результати\n' + user_data_parsed_list)
+        user_test = testRepo.findUserTestWithTestNameByUserTestId(str(data['user_test_id']))
+        start_time = user_test[3]
+        finish_time = user_test[4]
+        print(user_test)
+        user_data_parsed_list = F"\n📝 Назва тесту:\n{str(user_test[8])}" \
+                                F"\n⏳ Час початку:\n{str(start_time).split('.')[0]}" \
+                                F"\n⌛ Час завершення:\n{str(finish_time).split('.')[0]}" \
+                                F"\n⏰ Витрачено часу: {str(finish_time - start_time).split('.')[0]}" \
+                                F"\n🕐 Можлива тривалість: {str(user_test[9])} хвилин" \
+                                F"\n📄 Оцінка: {str(user_test[2])}"
+    await bot.edit_message_text(chat_id=event.from_user.id, message_id=event.message.message_id,text="🗂 Мої результати\n" + user_data_parsed_list, reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton(text="◀ Повернутися", callback_data="return_state")))
+
+
+@dp.callback_query_handler(lambda msg: True, state=FSMResult.return_state)
+async def result_view_handler(event: types.Message, state: FSMContext):
     await state.finish()
+    await FSMResult.chooseResult.set()
+    await bot.edit_message_text(chat_id=event.from_user.id, message_id=event.message.message_id, text="📑 Список результатів:",
+                           reply_markup=init_user_test_button_list(event.from_user.id))
