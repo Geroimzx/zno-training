@@ -24,7 +24,6 @@ async def result_view_handler(event: types.Message, state: FSMContext):
     await FSMResult.next()
     async with state.proxy() as data:
         user_test = testRepo.findUserTestWithTestNameByUserTestId(event.data.split("_")[1])
-        print(user_test)
         user_data_parsed_list = F"\nНазва тесту:\n{str(user_test[8])}" \
                                 F"\nЧас початку:\n{str(user_test[3])}" \
                                 F"\nЧас завершення:\n{str(user_test[4])}" \
