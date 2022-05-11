@@ -127,7 +127,7 @@ async def question_choose_handler(event: types.Message, state: FSMContext):
                                                                           F"\r\nВитрачено часу: "
                                                                           F"{str(data['End_time'] - data['Start_time']).split('.')[0]} "
                                                                           F"\r\nScore: tratata")
-
+        testRepo.updateUserTestFinished(data['Record_user_test_id'], data['End_time'])
     await event.answer(text="Тест успішно завершений")
     await state.finish()
 
