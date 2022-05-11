@@ -72,3 +72,19 @@ def init_start_stop_test_keyboard(state):
     else:
         ans.add(InlineKeyboardButton(text="Закінчити тест", callback_data="Stop"))
     return ans
+
+
+def init_user_test_button_list(user_id):
+    user_test_list = testRepo.findAllUserTestByUserId(user_id)
+    user_test_button_list = InlineKeyboardMarkup(row_width=100)
+    user_test_button_list.inline_keyboard.clear()
+    for test in user_test_list:
+        test_name = testRepo.findTestByTestId(test[5])[2]
+        test_start_time = str(test[3]).split(' ')[1].split('.')[0]
+        test_start_date = str(test[3]).split(' ')[0]
+        score = str(test[2])
+        user_test_button_list.add(InlineKeyboardButton(text=F"{test_start_time} {test_start_date}:"
+                                                            F"\n{test_name}"
+                                                            F"\nОцінка: {score}", callback_data=F"testId_{test[0]}"))
+    return user_test_button_list
+

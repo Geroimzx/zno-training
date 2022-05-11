@@ -2,8 +2,10 @@ from aiogram.utils.executor import start_polling
 
 from bot_init import dp, conn
 
-from handler.main_handler import *
 from handler.start_handler import *
+from handler.main_handler import *
+from handler.result_handler import  *
+
 
 
 # ---- Main func ----

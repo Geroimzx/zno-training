@@ -9,6 +9,7 @@ from bot_init import *
 from datetime import datetime
 import pytz
 
+
 @dp.message_handler(lambda msg: msg.text == "📝 Вибір предмету", state="*")
 async def subject_handler(message: types.Message):
     from keyboard.inline_keyboard import init_subject_inline_menu

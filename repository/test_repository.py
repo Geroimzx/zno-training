@@ -67,6 +67,11 @@ class TestRepository:
             cursor.execute("SELECT * FROM public.\"Test\" WHERE \"Year_id\" = %s", (year_id,))
             return cursor.fetchall()
 
+    def findTestByTestId(self, test_id):
+        with self.conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM public.\"Test\" WHERE \"Test_id\" = %s", (test_id,))
+            return cursor.fetchone()
+
     # Question Read query
     def findAllQuestionByTestId(self, test_id):
         with self.conn.cursor() as cursor:
@@ -86,6 +91,22 @@ class TestRepository:
         with self.conn.cursor() as cursor:
             cursor.execute("SELECT * FROM public.\"Answer\" WHERE \"Question_number\" = %s", (question_number,))
             return cursor.fetchall()
+
+    # UserTest query
+    def findAllUserTestByUserId(self, user_id):
+        with self.conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM public.\"UserTest\" WHERE \"User_id\" = %s", (user_id,))
+            return cursor.fetchall()
+
+    def findUserTestByUserTestId(self, user_test_id):
+        with self.conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM public.\"UserTest\" WHERE \"UserTest_id\" = %s", (user_test_id,))
+            return cursor.fetchone()
+
+    def findUserTestWithTestNameByUserTestId(self, user_test_id):
+        with self.conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM public.\"UserTest\" as u LEFT JOIN public.\"Test\" as t ON u.\"Test_id\" = t.\"Test_id\" WHERE u.\"UserTest_id\" = %s", (user_test_id,))
+            return cursor.fetchone()
 
     # UserAnswer Read query TODO: !!????????
     def findAllUserAnswerByUserTestId(self, user_test_id):
