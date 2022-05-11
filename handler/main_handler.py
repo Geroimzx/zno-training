@@ -96,15 +96,40 @@ async def start_test_handler(event: types.Message, state: FSMContext):
                                                      caption='До 1 завдання')
 
         tz_UA = pytz.timezone('Europe/Kiev')
-        data['Start time'] = datetime.now(tz_UA)
-        data['Record_user_test_id'] = testRepo.createUserTest(event.from_user.id, data['Test_id'], data['Start time'])
+        data['Start_time'] = datetime.now(tz_UA)
+        data['Record_user_test_id'] = testRepo.createUserTest(event.from_user.id, data['Test_id'], data['Start_time'])
 
 
 # Finish test state
 @dp.callback_query_handler(lambda msg: msg.data == "Stop", state=FSMStartTest.startTest)
 async def question_choose_handler(event: types.Message, state: FSMContext):
-    await FSMStartTest.next()
-    await event.answer(text="Closed")
+    async with state.proxy() as data:
+        if 'Test_msg' in data.keys():
+            await bot.delete_message(chat_id=data['Test_msg'].chat.id,
+                                     message_id=data['Test_msg'].message_id)
+            data.pop('Test_msg')
+        if 'media_msg' in data.keys():
+            await bot.delete_message(chat_id=data['media_msg'].chat.id,
+                                     message_id=data['media_msg'].message_id)
+            data.pop('media_msg')
+        await bot.edit_message_reply_markup(chat_id=data['msg'].chat.id,
+                                            message_id=data['msg'].message_id,
+                                            reply_markup=InlineKeyboardMarkup().inline_keyboard.clear())
+
+        tz_UA = pytz.timezone('Europe/Kiev')
+        data['End_time'] = datetime.now(tz_UA)
+        data['msg'] = await bot.edit_message_text(chat_id=data['msg'].chat.id,
+                                                  message_id=data['msg'].message_id,
+                                                  text=data['msg'].text + F"\r\nЧас початку:"
+                                                                          F"\r\n{str(data['Start_time']).split('.')[0]}"
+                                                                          F"\r\nЧас завершення:"
+                                                                          F"\r\n{str(data['End_time']).split('.')[0]}"
+                                                                          F"\r\nВитрачено часу: "
+                                                                          F"{str(data['End_time'] - data['Start_time']).split('.')[0]} "
+                                                                          F"\r\nScore: tratata")
+
+    await event.answer(text="Тест успішно завершений")
+    await state.finish()
 
 
 @dp.callback_query_handler(lambda msg: True, state=FSMStartTest.startTest)
