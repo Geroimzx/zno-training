@@ -115,6 +115,7 @@ async def start_test_handler(event: types.Message, state: FSMContext):
         tz_UA = pytz.timezone('Europe/Kiev')
         data['Start_time'] = datetime.now(tz_UA)
         data['Record_user_test_id'] = testRepo.createUserTest(event.from_user.id, data['Test_id'], data['Start_time'])
+        testRepo.updateUserTestFinished(data['Record_user_test_id'], data['Start_time'])
 
 
 def calculate_score(userTest_id, test_id):
@@ -169,6 +170,8 @@ async def question_choose_handler(event: types.Message, state: FSMContext):
                                       F"\r\nВитрачено часу: "\
                                       F"{str(data['End_time'] - data['Start_time']).split('.')[0]} "\
                                       F"\r\nScore: {score}"
+
+        testRepo.updateUserTestScore(data['Record_user_test_id'], score)
 
         data['msg'] = await bot.edit_message_text(chat_id=data['msg'].chat.id,
                                                   message_id=data['msg'].message_id,

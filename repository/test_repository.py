@@ -161,8 +161,8 @@ class TestRepository:
     # UserTest Update query
     def updateUserTestScore(self, user_test_id, score):
         with self.conn.cursor() as cursor:
-            cursor.execute("UPDATE public.\"UserTest\" SET \"UserTest_id\" = %s, \"Score\" = %s",
-                           (user_test_id, score))
+            cursor.execute("UPDATE public.\"UserTest\" SET \"Score\" = %s WHERE \"UserTest_id\" = %s",
+                           (score, user_test_id))
 
     def updateUserTestStarted(self, user_test_id, date_started):
         with self.conn.cursor() as cursor:
@@ -177,5 +177,5 @@ class TestRepository:
     def updateUserAnswer(self, user_answer_id, answer):
         with self.conn.cursor() as cursor:
             cursor.execute("UPDATE public.\"UserAnswer\" SET \"Answer\" = %s WHERE \"UserAnswer_id\" = %s",
-                           (answer, user_answer_id))
+                           (answer, user_answer_id,))
     # Delete query
