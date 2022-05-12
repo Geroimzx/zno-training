@@ -8,7 +8,7 @@ from config import *
 from repository.repository_init import *
 
 # Bot
-bot = Bot(token=BOT_TOKEN_Max)
+bot = Bot(token=BOT_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot=bot, storage=storage)
 
