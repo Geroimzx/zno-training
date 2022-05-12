@@ -63,6 +63,7 @@ async def test_question_handler(event: types.Message, state: FSMContext):
     res = testRepo.findAllQuestionByTestId(event.data.split('_')[1])
 
     async with state.proxy() as data:
+        # data['que_id'] = event.data.split('_')[2]
         data['Test_id'] = event.data.split('_')[1]
         data['Tests_data'] = res
         data['Time_test'] = event.data.split('_')[2]
@@ -87,10 +88,25 @@ async def start_test_handler(event: types.Message, state: FSMContext):
         data['msg'] = await bot.edit_message_reply_markup(chat_id=data['msg'].chat.id,
                                                           message_id=data['msg'].message_id,
                                                           reply_markup=init_start_stop_test_keyboard(1))
+        info_message = F'В тестах відповідайте надсилаючибукву з теоретично правильною відповіддю.\r\n' \
+                       F'Наприклад: A\r\n' \
+                       F'В відповідях з встановленням відповідності записуйти результат ' \
+                       F'через ; без лишніх символів.\r\n' \
+                       F'Наприклад: A;Б;В;Г\r\n' \
+                       F'В завданнях з відкритою відповіддю вказуйте лише результат.\r\n' \
+                       F'Наприклад: 2\r\n' \
+                       F'Якщо відповідей кілька впишіть будь-яку з них.'
+        data['Info_msg'] = await bot.send_message(chat_id=event.from_user.id, text=info_message)
         msg = getTestData(data['Test_id'], 1)
+        tests = getInlineTestListById(data['Test_id'], 1)
         data['Test_msg'] = await bot.send_message(chat_id=event.from_user.id,
-                                                  text=F"Питання {msg[0][4]}. \r\n{msg[0][2]}",
-                                                  reply_markup=getInlineTestListById(data['Test_id'], 1))
+                                                  text=F"Питання {msg[0][4]}. \r\n{msg[0][2]}"
+                                                       F"Ваша відповідь: ви ще не давали відповіді",
+                                                  reply_markup=tests)
+
+        data['Question_id'] = tests.inline_keyboard[0][0].callback_data.split('_')[2]
+        data['Question_number'] = 1
+
         if msg[0][3] != '':
             data['media_msg'] = await bot.send_photo(chat_id=data['Test_msg'].chat.id,
                                                      photo=msg[0][3],
@@ -112,6 +128,9 @@ async def question_choose_handler(event: types.Message, state: FSMContext):
         if 'media_msg' in data.keys():
             await bot.delete_message(chat_id=data['media_msg'].chat.id,
                                      message_id=data['media_msg'].message_id)
+        if 'Info_msg' in data.keys():
+            await bot.delete_message(chat_id=data['Info_msg'].chat.id,
+                                     message_id=data['Info_msg'].message_id)
             data.pop('media_msg')
         await bot.edit_message_reply_markup(chat_id=data['msg'].chat.id,
                                             message_id=data['msg'].message_id,
@@ -130,17 +149,26 @@ async def question_choose_handler(event: types.Message, state: FSMContext):
                                                                           F"\r\nScore: tratata")
         testRepo.updateUserTestFinished(data['Record_user_test_id'], data['End_time'])
     await event.answer(text="Тест успішно завершений")
+
     await state.finish()
 
 
 @dp.callback_query_handler(lambda msg: True, state=FSMStartTest.startTest)
 async def question_choose_handler(event: types.Message, state: FSMContext):
     async with state.proxy() as data:
+        data['Question_id'] = event.data.split('_')[2]
+        data['Question_number'] = event.data.split('_')[1]
         msg = getTestData(data['Test_id'], event.data.split('_')[1])
 
+        userAns = testRepo.findTestAnswerByUserTestIdWithQuestionId(data['Record_user_test_id'], data['Question_id'])
+        if len(userAns) == 1:
+            userAns = userAns[0][1]
+        else:
+            userAns = "ви ще не давали відповіді"
         data['Test_msg'] = await bot.edit_message_text(chat_id=data['Test_msg'].chat.id,
                                                        message_id=data['Test_msg'].message_id,
-                                                       text=F"Питання {msg[0][4]}. \r\n{msg[0][2]}",
+                                                       text=F"Питання {msg[0][4]}. \r\n{msg[0][2]}"
+                                                            F"Ваша відповідь: {userAns}",
                                                        reply_markup=getInlineTestListById(data['Test_id'], msg[0][4]))
         if msg[0][3] != '':
             if 'media_msg' in data.keys():
@@ -163,3 +191,29 @@ async def cancel_handler(message: types.Message, state: FSMContext):
         return
     await state.finish()
     await message.answer('✅', reply=True)
+
+
+def set_user_answer(test_id, question_id, ans):
+    res = testRepo.findTestAnswerByUserTestIdWithQuestionId(test_id, question_id)
+    if len(res) == 0:
+        testRepo.createUserAnswer(test_id, question_id, ans)
+    if len(res) == 1:
+        testRepo.updateUserAnswer(res[0][0], ans)
+
+
+@dp.message_handler(lambda ms: True, state=FSMStartTest.startTest)
+async def user_answer_handler(event: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        msg = event.text
+        set_user_answer(data['Record_user_test_id'], data['Question_id'], event.text)
+        await bot.delete_message(chat_id=event.from_user.id, message_id=event.message_id)
+
+        data['Test_msg'] = await bot.edit_message_text(chat_id=data['Test_msg'].chat.id,
+                                                       message_id=data['Test_msg'].message_id,
+                                                       text=F"Питання {data['Question_number']}.\r\n"
+                                                            F"Ваша відповідь: {event.text}",
+                                                       reply_markup=getInlineTestListById(data['Test_id'],
+                                                                                          int(data['Question_number']))
+                                                       )
+
+    # await bot.send_message(chat_id=event.from_user.id, text=event.text)

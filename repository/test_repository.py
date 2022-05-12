@@ -15,12 +15,12 @@ class TestRepository:
                            (user_id, test_id, test_started))
             return cursor.fetchall()[0][0]
 
-    def createUserAnswer(self, user_answer_id, user_test_id, question_id, answer):
+    def createUserAnswer(self, user_test_id, question_id, answer):
         with self.conn.cursor() as cursor:
             cursor.execute(
-                "INSERT INTO public.\"UserAnswer\"(\"UserAnswer_id\", \"Question_id\", \"UserTest_id\", \"Answer\") "
-                "VALUES(%s, %s, %s, %s)",
-                (user_answer_id, user_test_id, question_id, answer))
+                "INSERT INTO public.\"UserAnswer\"(\"Question_id\", \"UserTest_id\", \"Answer\") "
+                "VALUES(%s, %s, %s)",
+                (question_id, user_test_id, answer))
 
     # Read query
 
@@ -129,6 +129,14 @@ class TestRepository:
                 (user_test_id,))
             return cursor.fetchall()
 
+    def findTestAnswerByUserTestIdWithQuestionId(self, userTest_id, question_id):
+        with self.conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT \"UserAnswer_id\", \"Answer\" FROM public.\"UserAnswer\" WHERE \"UserTest_id\" = %s AND"
+                "\"Question_id\" = %s",
+                (userTest_id, question_id,))
+
+            return cursor.fetchall()
     # Update query
 
     # UserTest Update query

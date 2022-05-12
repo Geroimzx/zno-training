@@ -39,11 +39,11 @@ def init_year_inline_button(subject_id):
     return year_inline_button_array
 
 
-def getInlineTestListById(test_id, current_test_number):
+def getInlineTestListById(test_num, current_test_number):
     ans = InlineKeyboardMarkup(row_width=2)
     ans.inline_keyboard.clear()
     ans = InlineKeyboardMarkup(row_width=30)
-    res = testRepo.findAllQuestionByTestId(test_id)
+    res = testRepo.findAllQuestionByTestId(test_num)
     btn = [[]]
     for val in res:
         if len(btn[len(btn) - 1]) == 7:
@@ -52,7 +52,7 @@ def getInlineTestListById(test_id, current_test_number):
             text = '⏺' + str(val[4])
         else:
             text = str(val[4])
-        btn[len(btn) - 1].append(InlineKeyboardButton(text=text, callback_data=F"testNumber_{val[4]}"))
+        btn[len(btn) - 1].append(InlineKeyboardButton(text=text, callback_data=F"testNumber_{val[4]}_{val[0]}"))
 
     for val in btn:
         ans.row(*val)
