@@ -23,9 +23,8 @@ async def result_view_handler(event: types.Message, state: FSMContext):
     await FSMResult.next()
     async with state.proxy() as data:
         user_test = testRepo.findUserTestWithTestNameByUserTestId(str(data['user_test_id']))
-        tz_UA = pytz.timezone('Europe/Kiev')
-        start_time = user_test[3].astimezone(tz_UA)
-        finish_time = user_test[4].astimezone(tz_UA)
+        start_time = user_test[3]
+        finish_time = user_test[4]
         user_data_parsed_list = F"\n📝 Назва тесту:\n{str(user_test[8])}" \
                                 F"\n⏳ Час початку:\n{str(start_time).split('.')[0]}" \
                                 F"\n⌛ Час завершення:\n{str(finish_time).split('.')[0]}" \
