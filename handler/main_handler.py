@@ -113,7 +113,7 @@ async def start_test_handler(event: types.Message, state: FSMContext):
                                                      caption='До 1 завдання')
 
         tz_UA = pytz.timezone('Europe/Kiev')
-        data['Start_time'] = datetime.now(tz_UA).astimezone(tz_UA)
+        data['Start_time'] = datetime.now(tz_UA)
         data['Record_user_test_id'] = testRepo.createUserTest(event.from_user.id, data['Test_id'], data['Start_time'])
 
 
@@ -137,7 +137,7 @@ async def question_choose_handler(event: types.Message, state: FSMContext):
                                             reply_markup=InlineKeyboardMarkup().inline_keyboard.clear())
 
         tz_UA = pytz.timezone('Europe/Kiev')
-        data['End_time'] = datetime.now(tz_UA).astimezone(tz_UA)
+        data['End_time'] = datetime.now(tz_UA)
         data['msg'] = await bot.edit_message_text(chat_id=data['msg'].chat.id,
                                                   message_id=data['msg'].message_id,
                                                   text=data['msg'].text + F"\r\nЧас початку:"
