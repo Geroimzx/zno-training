@@ -88,7 +88,7 @@ async def start_test_handler(event: types.Message, state: FSMContext):
         data['msg'] = await bot.edit_message_reply_markup(chat_id=data['msg'].chat.id,
                                                           message_id=data['msg'].message_id,
                                                           reply_markup=init_start_stop_test_keyboard(1))
-        info_message = F'В тестах відповідайте надсилаючибукву з теоретично правильною відповіддю.\r\n' \
+        info_message = F'В тестах відповідайте надсилаючи букву з теоретично правильною відповіддю.\r\n' \
                        F'Наприклад: A\r\n' \
                        F'В відповідях з встановленням відповідності записуйти результат ' \
                        F'через ; без лишніх символів.\r\n' \
