@@ -85,8 +85,8 @@ def init_user_test_button_list(user_id):
     for test in user_test_list:
         test_name = testRepo.findTestByTestId(test[5])[2]
         test_timestamp = datetime.datetime(test[3]).astimezone(pytz.timezone('Europe/Kiev'))
-        test_start_time = str(test[3]).split(' ')[1].split('.')[0]
-        test_start_date = str(test[3]).split(' ')[0]
+        test_start_time = str(test_timestamp).split(' ')[1].split('.')[0]
+        test_start_date = str(test_timestamp).split(' ')[0]
         score = str(test[2])
         user_test_button_list.add(InlineKeyboardButton(text=F"{test_start_time} {test_start_date}:"
                                                             F"\n{test_name}"
