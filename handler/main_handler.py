@@ -117,6 +117,28 @@ async def start_test_handler(event: types.Message, state: FSMContext):
         data['Record_user_test_id'] = testRepo.createUserTest(event.from_user.id, data['Test_id'], data['Start_time'])
 
 
+def calculate_score(userTest_id, test_id):
+    cnt = testRepo.getCountOfQuestionsByTestId(test_id)
+    ans = '/' + str(cnt)
+    print('Count of questions:', ans)
+    res = testRepo.findRecordsToCheckByUserTestId(userTest_id)
+
+    cnt = 0
+    for var in res:
+        if len(var[1].split(';')) == 1:
+            if (var[0] in var[1].split(':')) and bool(var[0]):
+                cnt = cnt + 1
+        else:
+            i = 0
+            for val2 in var[1].split(';'):
+                if (val2 == (var[0].split(';'))[i]) and bool(val2):
+                    cnt = cnt + (1 / (len(var[1].split(';'))))
+                i = i + 1
+
+    ans = str(cnt) + ans
+    return ans
+
+
 # Finish test state
 @dp.callback_query_handler(lambda msg: msg.data == "Stop", state=FSMStartTest.startTest)
 async def question_choose_handler(event: types.Message, state: FSMContext):
@@ -138,15 +160,19 @@ async def question_choose_handler(event: types.Message, state: FSMContext):
 
         tz_UA = pytz.timezone('Europe/Kiev')
         data['End_time'] = datetime.now(tz_UA)
+
+        score = calculate_score(data['Record_user_test_id'], data['Test_id'])
+        msg_text = data['msg'].text + F"\r\nЧас початку:"\
+                                      F"\r\n{str(data['Start_time']).split('.')[0]}"\
+                                      F"\r\nЧас завершення:"\
+                                      F"\r\n{str(data['End_time']).split('.')[0]}"\
+                                      F"\r\nВитрачено часу: "\
+                                      F"{str(data['End_time'] - data['Start_time']).split('.')[0]} "\
+                                      F"\r\nScore: {score}"
+
         data['msg'] = await bot.edit_message_text(chat_id=data['msg'].chat.id,
                                                   message_id=data['msg'].message_id,
-                                                  text=data['msg'].text + F"\r\nЧас початку:"
-                                                                          F"\r\n{str(data['Start_time']).split('.')[0]}"
-                                                                          F"\r\nЧас завершення:"
-                                                                          F"\r\n{str(data['End_time']).split('.')[0]}"
-                                                                          F"\r\nВитрачено часу: "
-                                                                          F"{str(data['End_time'] - data['Start_time']).split('.')[0]} "
-                                                                          F"\r\nScore: tratata")
+                                                  text=msg_text)
         testRepo.updateUserTestFinished(data['Record_user_test_id'], data['End_time'])
     await event.answer(text="Тест успішно завершений")
 
@@ -216,4 +242,3 @@ async def user_answer_handler(event: types.Message, state: FSMContext):
                                                                                           int(data['Question_number']))
                                                        )
 
-    # await bot.send_message(chat_id=event.from_user.id, text=event.text)

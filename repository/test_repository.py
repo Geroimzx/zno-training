@@ -105,7 +105,9 @@ class TestRepository:
 
     def findUserTestWithTestNameByUserTestId(self, user_test_id):
         with self.conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM public.\"UserTest\" as u LEFT JOIN public.\"Test\" as t ON u.\"Test_id\" = t.\"Test_id\" WHERE u.\"UserTest_id\" = %s", (user_test_id,))
+            cursor.execute(
+                "SELECT * FROM public.\"UserTest\" as u LEFT JOIN public.\"Test\" as t ON u.\"Test_id\" = t.\"Test_id\" WHERE u.\"UserTest_id\" = %s",
+                (user_test_id,))
             return cursor.fetchone()
 
     # UserAnswer Read query TODO: !!????????
@@ -137,6 +139,23 @@ class TestRepository:
                 (userTest_id, question_id,))
 
             return cursor.fetchall()
+
+    def findRecordsToCheckByUserTestId(self, userTest_id):
+        with self.conn.cursor() as cursor:
+            cursor.execute('select "UserAnswer"."Answer" as "User", "Answer"."Answer" as "Corect"'
+                           'from "Answer" RIGHT JOIN "UserAnswer" ON "UserAnswer"."Question_id" = '
+                           '"Answer"."Question_id" '
+                           'where "UserTest_id" =  %s;',
+                           (userTest_id,))
+            return cursor.fetchall()
+
+    def getCountOfQuestionsByTestId(self, Test_id):
+        with self.conn.cursor() as cursor:
+            cursor.execute("select count(\"Question_number\") from \"Question\" WHERE \"Test_id\" = %s;",
+                           (Test_id,))
+
+            return cursor.fetchall()[0][0]
+
     # Update query
 
     # UserTest Update query
