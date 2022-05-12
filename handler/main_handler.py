@@ -88,7 +88,7 @@ async def start_test_handler(event: types.Message, state: FSMContext):
         data['msg'] = await bot.edit_message_reply_markup(chat_id=data['msg'].chat.id,
                                                           message_id=data['msg'].message_id,
                                                           reply_markup=init_start_stop_test_keyboard(1))
-        info_message = F'В тестах відповідайте надсилаючибукву з теоретично правильною відповіддю.\r\n' \
+        info_message = F'В тестах відповідайте надсилаючи букву з теоретично правильною відповіддю.\r\n' \
                        F'Наприклад: A\r\n' \
                        F'В відповідях з встановленням відповідності записуйти результат ' \
                        F'через ; без лишніх символів.\r\n' \
@@ -113,7 +113,7 @@ async def start_test_handler(event: types.Message, state: FSMContext):
                                                      caption='До 1 завдання')
 
         tz_UA = pytz.timezone('Europe/Kiev')
-        data['Start_time'] = datetime.now(tz_UA)
+        data['Start_time'] = datetime.now(tz_UA).astimezone(tz_UA)
         data['Record_user_test_id'] = testRepo.createUserTest(event.from_user.id, data['Test_id'], data['Start_time'])
 
 
@@ -137,7 +137,7 @@ async def question_choose_handler(event: types.Message, state: FSMContext):
                                             reply_markup=InlineKeyboardMarkup().inline_keyboard.clear())
 
         tz_UA = pytz.timezone('Europe/Kiev')
-        data['End_time'] = datetime.now(tz_UA)
+        data['End_time'] = datetime.now(tz_UA).astimezone(tz_UA)
         data['msg'] = await bot.edit_message_text(chat_id=data['msg'].chat.id,
                                                   message_id=data['msg'].message_id,
                                                   text=data['msg'].text + F"\r\nЧас початку:"
