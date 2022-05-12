@@ -1,6 +1,10 @@
+import datetime
+
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot_init import *
+from datetime import datetime
+import pytz
 
 subject_inline_button_array = []
 year_array = []
@@ -80,6 +84,7 @@ def init_user_test_button_list(user_id):
     user_test_button_list.inline_keyboard.clear()
     for test in user_test_list:
         test_name = testRepo.findTestByTestId(test[5])[2]
+        test_timestamp = datetime.datetime(test[3]).astimezone(pytz.timezone('Europe/Kiev'))
         test_start_time = str(test[3]).split(' ')[1].split('.')[0]
         test_start_date = str(test[3]).split(' ')[0]
         score = str(test[2])
