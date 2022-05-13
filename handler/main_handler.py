@@ -114,7 +114,7 @@ async def start_test_handler(event: types.Message, state: FSMContext):
 
         tz_UA = pytz.timezone('Europe/Kiev')
         now = datetime.now(tz_UA)
-        naive_start_time = datetime.combine(now, time(int(now.hour), int(now.minute)))
+        naive_start_time = datetime.combine(now, time(int(now.hour), int(now.minute), int(now.second)))
         data['Start_time'] = naive_start_time
 
         data['Record_user_test_id'] = testRepo.createUserTest(event.from_user.id, data['Test_id'], data['Start_time'])
@@ -164,7 +164,7 @@ async def question_choose_handler(event: types.Message, state: FSMContext):
 
         tz_UA = pytz.timezone('Europe/Kiev')
         now = datetime.now(tz_UA)
-        naive_start_time = datetime.combine(now, time(int(now.hour), int(now.minute)))
+        naive_start_time = datetime.combine(now, time(int(now.hour), int(now.minute), int(now.second)))
         data['End_time'] = naive_start_time
 
         score = calculate_score(data['Record_user_test_id'], data['Test_id'])
