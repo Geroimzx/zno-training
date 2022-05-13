@@ -3,7 +3,7 @@ class UserRepository:
         self.conn = conn
 
     # Create query
-    def addUser(self, user_id, user_name, first_name, last_name, registered_date, last_time_online_date):
+    def addUser(self, user_id, user_name, first_name, last_name, registered_date):
         with self.conn.cursor() as cursor:
             cursor.execute("INSERT INTO public.\"User\"(\"User_id\", \"UserName\", \"FirstName\", \"LastName\", \"RegisteredDate\") VALUES(%s, %s, %s, %s, %s)",
                            (user_id, user_name, first_name, last_name, registered_date))
