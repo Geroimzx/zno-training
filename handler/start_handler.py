@@ -1,4 +1,5 @@
 from aiogram import types
+from aiogram.dispatcher import FSMContext
 
 from bot_init import *
 
@@ -7,7 +8,10 @@ from keyboard.keyboard import keyboard
 
 # Call when /start or /restart
 @dp.message_handler(commands={"start", "restart"})
-async def start_handler(event: types.Message):
+async def start_handler(event: types.Message, state: FSMContext):
+    cur_state = await state.get_state()
+    if cur_state is not None:
+        await state.finish()
     # If User not exists in DB insert him data into DB
     if not userRepo.existsUserById(event.from_user.id):
         userRepo.addUser(user_id=event.from_user.id, user_name=event.from_user.username,
