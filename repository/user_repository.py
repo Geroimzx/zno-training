@@ -3,10 +3,15 @@ class UserRepository:
         self.conn = conn
 
     # Create query
-    def addUser(self, user_id, user_name, first_name, last_name):
+    def addUser(self, user_id, user_name, first_name, last_name, registered_date, last_time_online_date):
         with self.conn.cursor() as cursor:
-            cursor.execute("INSERT INTO public.\"User\"(\"User_id\", \"UserName\", \"FirstName\", \"LastName\") VALUES(%s, %s, %s, %s)",
-                           (user_id, user_name, first_name, last_name))
+            cursor.execute("INSERT INTO public.\"User\"(\"User_id\", \"UserName\", \"FirstName\", \"LastName\", \"RegisteredDate\") VALUES(%s, %s, %s, %s, %s)",
+                           (user_id, user_name, first_name, last_name, registered_date))
+
+    def updateUserTimeOnlineDate(self, user_id, last_time_online_date):
+        with self.conn.cursor() as cursor:
+            cursor.execute("UPDATE  public.\"User\" SET \"LastTimeOnlineDate\"=%s WHERE \"User_id\"=%s",
+                           (last_time_online_date, user_id))
 
     # Read query
     def findAllUsers(self):

@@ -6,12 +6,12 @@ from keyboard.inline_keyboard import *
 
 from bot_init import *
 
-from datetime import datetime, time
-import pytz
+from time_util.current_time import *
 
 
 @dp.message_handler(lambda msg: msg.text == "📝 Вибір предмету", state="*")
 async def subject_handler(message: types.Message):
+    userRepo.updateUserTimeOnlineDate(message.from_user.id, current_time())
     from keyboard.inline_keyboard import init_subject_inline_menu
     await FSMStartTest.chooseSubject.set()
     await bot.send_message(message.from_user.id, 'Виберіть предмет:', reply_markup=init_subject_inline_menu())
@@ -19,6 +19,7 @@ async def subject_handler(message: types.Message):
 
 @dp.callback_query_handler(lambda c: True, state=FSMStartTest.chooseSubject)
 async def year_handler(event: types.Message, state: FSMContext):
+    userRepo.updateUserTimeOnlineDate(event.from_user.id, current_time())
     async with state.proxy() as data:
         data['msg'] = event
         data['subjectId'] = event.data.split('_')[1]
@@ -34,6 +35,7 @@ async def year_handler(event: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(lambda msg: True, state=FSMStartTest.chooseYear)
 async def test_type_handler(event: types.Message, state: FSMContext):
+    userRepo.updateUserTimeOnlineDate(event.from_user.id, current_time())
     async with state.proxy() as data:
         data['Year'] = event.data.split('_')[1]
 
@@ -58,6 +60,8 @@ async def test_type_handler(event: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(lambda msg: True, state=FSMStartTest.chooseTestType)
 async def test_question_handler(event: types.Message, state: FSMContext):
+    userRepo.updateUserTimeOnlineDate(event.from_user.id, current_time())
+
     await FSMStartTest.next()
 
     res = testRepo.findAllQuestionByTestId(event.data.split('_')[1])
@@ -82,6 +86,8 @@ async def test_question_handler(event: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(lambda msg: msg.data == 'Start', state=FSMStartTest.waitForUser)
 async def start_test_handler(event: types.Message, state: FSMContext):
+    userRepo.updateUserTimeOnlineDate(event.from_user.id, current_time())
+
     await FSMStartTest.next()
 
     async with state.proxy() as data:
@@ -112,20 +118,16 @@ async def start_test_handler(event: types.Message, state: FSMContext):
                                                      photo=msg[0][3],
                                                      caption='До 1 завдання')
 
-        tz_UA = pytz.timezone('Europe/Kiev')
-        now = datetime.now(tz_UA)
-        naive_start_time = datetime.combine(now, time(int(now.hour), int(now.minute), int(now.second)))
-        data['Start_time'] = naive_start_time
+        data['Start_time'] = current_time()
 
         data['Record_user_test_id'] = testRepo.createUserTest(event.from_user.id, data['Test_id'], data['Start_time'])
         testRepo.updateUserTestFinished(data['Record_user_test_id'], data['Start_time'])
 
 
-def calculate_score(userTest_id, test_id):
+def calculate_score(user_test_id, test_id):
     cnt = testRepo.getCountOfQuestionsByTestId(test_id)
     ans = '/' + str(cnt)
-    print('Count of questions:', ans)
-    res = testRepo.findRecordsToCheckByUserTestId(userTest_id)
+    res = testRepo.findRecordsToCheckByUserTestId(user_test_id)
 
     cnt = 0
     for var in res:
@@ -146,6 +148,7 @@ def calculate_score(userTest_id, test_id):
 # Finish test state
 @dp.callback_query_handler(lambda msg: msg.data == "Stop", state=FSMStartTest.startTest)
 async def question_choose_handler(event: types.Message, state: FSMContext):
+    userRepo.updateUserTimeOnlineDate(event.from_user.id, current_time())
     async with state.proxy() as data:
         if 'Test_msg' in data.keys():
             await bot.delete_message(chat_id=data['Test_msg'].chat.id,
@@ -162,18 +165,15 @@ async def question_choose_handler(event: types.Message, state: FSMContext):
                                             message_id=data['msg'].message_id,
                                             reply_markup=InlineKeyboardMarkup().inline_keyboard.clear())
 
-        tz_UA = pytz.timezone('Europe/Kiev')
-        now = datetime.now(tz_UA)
-        naive_start_time = datetime.combine(now, time(int(now.hour), int(now.minute), int(now.second)))
-        data['End_time'] = naive_start_time
+        data['End_time'] = current_time()
 
         score = calculate_score(data['Record_user_test_id'], data['Test_id'])
-        msg_text = data['msg'].text + F"\r\nЧас початку:"\
-                                      F"\r\n{str(data['Start_time']).split('.')[0]}"\
-                                      F"\r\nЧас завершення:"\
-                                      F"\r\n{str(data['End_time']).split('.')[0]}"\
-                                      F"\r\nВитрачено часу: "\
-                                      F"{str(data['End_time'] - data['Start_time']).split('.')[0]} "\
+        msg_text = data['msg'].text + F"\r\nЧас початку:" \
+                                      F"\r\n{str(data['Start_time']).split('.')[0]}" \
+                                      F"\r\nЧас завершення:" \
+                                      F"\r\n{str(data['End_time']).split('.')[0]}" \
+                                      F"\r\nВитрачено часу: " \
+                                      F"{str(data['End_time'] - data['Start_time']).split('.')[0]} " \
                                       F"\r\nПравильних відповідей: {score}"
 
         testRepo.updateUserTestScore(data['Record_user_test_id'], score)
@@ -189,20 +189,21 @@ async def question_choose_handler(event: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(lambda msg: True, state=FSMStartTest.startTest)
 async def question_choose_handler(event: types.Message, state: FSMContext):
+    userRepo.updateUserTimeOnlineDate(event.from_user.id, current_time())
     async with state.proxy() as data:
         data['Question_id'] = event.data.split('_')[2]
         data['Question_number'] = event.data.split('_')[1]
         msg = getTestData(data['Test_id'], event.data.split('_')[1])
 
-        userAns = testRepo.findTestAnswerByUserTestIdWithQuestionId(data['Record_user_test_id'], data['Question_id'])
-        if len(userAns) == 1:
-            userAns = userAns[0][1]
+        user_ans = testRepo.findTestAnswerByUserTestIdWithQuestionId(data['Record_user_test_id'], data['Question_id'])
+        if len(user_ans) == 1:
+            user_ans = user_ans[0][1]
         else:
-            userAns = "ви ще не давали відповіді"
+            user_ans = "ви ще не давали відповіді"
         data['Test_msg'] = await bot.edit_message_text(chat_id=data['Test_msg'].chat.id,
                                                        message_id=data['Test_msg'].message_id,
                                                        text=F"Питання {msg[0][4]}. \r\n{msg[0][2]}"
-                                                            F"Ваша відповідь: {userAns}",
+                                                            F"Ваша відповідь: {user_ans}",
                                                        reply_markup=getInlineTestListById(data['Test_id'], msg[0][4]))
         if msg[0][3] != '':
             if 'media_msg' in data.keys():
@@ -220,6 +221,7 @@ async def question_choose_handler(event: types.Message, state: FSMContext):
 
 @dp.message_handler(lambda msg: msg.text == '❌ Скасувати', state="*")
 async def cancel_handler(message: types.Message, state: FSMContext):
+    userRepo.updateUserTimeOnlineDate(message.from_user.id, current_time())
     cur_state = await state.get_state()
     if cur_state is None:
         return
@@ -237,6 +239,7 @@ def set_user_answer(test_id, question_id, ans):
 
 @dp.message_handler(lambda ms: True, state=FSMStartTest.startTest)
 async def user_answer_handler(event: types.Message, state: FSMContext):
+    userRepo.updateUserTimeOnlineDate(event.from_user.id, current_time())
     async with state.proxy() as data:
         msg = event.text
         set_user_answer(data['Record_user_test_id'], data['Question_id'], event.text)
@@ -249,4 +252,3 @@ async def user_answer_handler(event: types.Message, state: FSMContext):
                                                        reply_markup=getInlineTestListById(data['Test_id'],
                                                                                           int(data['Question_number']))
                                                        )
-

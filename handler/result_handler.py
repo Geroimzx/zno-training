@@ -5,18 +5,19 @@ from bot_init import *
 from state.FSMResult import *
 from keyboard.inline_keyboard import *
 
-from datetime import datetime
-import pytz
+from time_util.current_time import *
 
 
 @dp.message_handler(lambda msg: msg.text == "🗂 Мої результати", state="*")
 async def result_handler(message: types.Message):
+    userRepo.updateUserTimeOnlineDate(message.from_user.id, current_time())
     await FSMResult.chooseResult.set()
     await bot.send_message(message.from_user.id, "📑 Список результатів:", reply_markup=init_user_test_button_list(message.from_user.id))
 
 
 @dp.callback_query_handler(lambda msg: True, state=FSMResult.chooseResult)
 async def result_view_handler(event: types.Message, state: FSMContext):
+    userRepo.updateUserTimeOnlineDate(event.from_user.id, current_time())
     async with state.proxy() as data:
         data['msg'] = event
         data['user_test_id'] = event.data.split('_')[1]
@@ -36,6 +37,7 @@ async def result_view_handler(event: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(lambda msg: True, state=FSMResult.return_state)
 async def result_view_handler(event: types.Message, state: FSMContext):
+    userRepo.updateUserTimeOnlineDate(event.from_user.id, current_time())
     await state.finish()
     await FSMResult.chooseResult.set()
     await bot.edit_message_text(chat_id=event.from_user.id, message_id=event.message.message_id, text="📑 Список результатів:",
