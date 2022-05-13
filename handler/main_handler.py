@@ -6,7 +6,7 @@ from keyboard.inline_keyboard import *
 
 from bot_init import *
 
-from datetime import datetime
+from datetime import datetime, time
 import pytz
 
 
@@ -113,7 +113,10 @@ async def start_test_handler(event: types.Message, state: FSMContext):
                                                      caption='До 1 завдання')
 
         tz_UA = pytz.timezone('Europe/Kiev')
-        data['Start_time'] = datetime.now(tz_UA)
+        now = datetime.now(tz_UA)
+        naive_start_time = datetime.combine(now, time(int(now.hour), int(now.minute)))
+        data['Start_time'] = naive_start_time
+
         data['Record_user_test_id'] = testRepo.createUserTest(event.from_user.id, data['Test_id'], data['Start_time'])
         testRepo.updateUserTestFinished(data['Record_user_test_id'], data['Start_time'])
 
@@ -160,7 +163,9 @@ async def question_choose_handler(event: types.Message, state: FSMContext):
                                             reply_markup=InlineKeyboardMarkup().inline_keyboard.clear())
 
         tz_UA = pytz.timezone('Europe/Kiev')
-        data['End_time'] = datetime.now(tz_UA)
+        now = datetime.now(tz_UA)
+        naive_start_time = datetime.combine(now, time(int(now.hour), int(now.minute)))
+        data['End_time'] = naive_start_time
 
         score = calculate_score(data['Record_user_test_id'], data['Test_id'])
         msg_text = data['msg'].text + F"\r\nЧас початку:"\
@@ -169,7 +174,7 @@ async def question_choose_handler(event: types.Message, state: FSMContext):
                                       F"\r\n{str(data['End_time']).split('.')[0]}"\
                                       F"\r\nВитрачено часу: "\
                                       F"{str(data['End_time'] - data['Start_time']).split('.')[0]} "\
-                                      F"\r\nScore: {score}"
+                                      F"\r\nПравильних відповідей: {score}"
 
         testRepo.updateUserTestScore(data['Record_user_test_id'], score)
 

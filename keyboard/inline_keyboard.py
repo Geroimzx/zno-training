@@ -90,6 +90,6 @@ def init_user_test_button_list(user_id):
         score = str(test[2])
         user_test_button_list.add(InlineKeyboardButton(text=F"{test_start_time} {test_start_date}:"
                                                             F"\n{test_name}"
-                                                            F"\nОцінка: {score}", callback_data=F"testId_{test[0]}"))
+                                                            F"\nПравильних відповідей: {score}", callback_data=F"testId_{test[0]}"))
     return user_test_button_list
 
