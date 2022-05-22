@@ -31,12 +31,12 @@ class UserRepository:
 
     def countAllUser(self):
         with self.conn.cursor() as cursor:
-            cursor.execute("SELECT COUNT() FROM public.\"User\"")
+            cursor.execute("SELECT COUNT(*) FROM public.\"User\"")
             return cursor.fetchone()[0]
 
     def countAllUserRegToday(self):
         with self.conn.cursor() as cursor:
-            cursor.execute("SELECT COUNT() FROM public.\"User\" WHERE \"RegisteredDate\" >= CURRENT_DATE")
+            cursor.execute("SELECT COUNT(*) FROM public.\"User\" WHERE \"RegisteredDate\" >= CURRENT_DATE")
             return cursor.fetchone()[0]
 
     def countAllUserOnlineToday(self):
