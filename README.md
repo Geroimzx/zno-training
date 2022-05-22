@@ -1,3 +1,3 @@
 # zno-training
 Бот для виконання завдань ЗНО в Телеграм
-![Diagram](https://user-images.githubusercontent.com/27133327/161038337-84c80774-0ad8-4409-b383-ec28fe91e583.png)
+![Diagram]![image](https://user-images.githubusercontent.com/27133327/169712126-f5940403-c7fc-4d14-83a9-697808019e4b.png)
