@@ -17,5 +17,5 @@ def main():
         print("[INFO] Connection to DB closed")
 
 
-if name == 'main':
+if __name__ == '__main__':
     main()
