@@ -29,8 +29,21 @@ class UserRepository:
             cursor.execute("SELECT EXISTS(SELECT 1 FROM public.\"User\" WHERE \"User_id\" = %s)", (user_id,))
             return cursor.fetchone()[0]
 
+    def countAllUser(self):
+        with self.conn.cursor() as cursor:
+            cursor.execute("SELECT COUNT() FROM public."User"")
+            return cursor.fetchone()[0]
+
+    def countAllUserRegToday(self):
+        with self.conn.cursor() as cursor:
+            cursor.execute("SELECT COUNT() FROM public."User" WHERE "RegisteredDate" >= CURRENT_DATE")
+            return cursor.fetchone()[0]
+
+    def countAllUserOnlineToday(self):
+        with self.conn.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) FROM public."User" WHERE "LastTimeOnlineDate" >= CURRENT_DATE")
+            return cursor.fetchone()[0]
     # Update query
 
     # Delete query
-
-
+    
