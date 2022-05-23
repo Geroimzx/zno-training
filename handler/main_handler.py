@@ -131,14 +131,14 @@ def calculate_score(user_test_id, test_id):
 
     cnt = 0
     for var in res:
-        if len(var[1].split(';')) == 1:
-            if (var[0] in var[1].split(':')) and bool(var[0]):
+        if len(str(var[1]).split(';')) == 1:
+            if (str(var[0]) in str(var[1]).split(':')) and bool(var[0]):
                 cnt = cnt + 1
         else:
             i = 0
-            for val2 in var[1].split(';'):
-                if (val2 == (var[0].split(';'))[i]) and bool(val2):
-                    cnt = cnt + (1 / (len(var[1].split(';'))))
+            for val2 in str(var[1]).split(';'):
+                if (val2 == (str(var[0]).split(';'))[i]) and bool(val2):
+                    cnt = cnt + (1 / (len(str(var[1]).split(';'))))
                 i = i + 1
 
     ans = str(cnt) + ans
